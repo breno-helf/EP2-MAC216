@@ -13,8 +13,8 @@ typedef struct buffer_s {
 */
 Buffer *buffer_create() {
     Buffer *B;
-    B->
-    B->n = 0
+    B->data = malloc(sizeof(char) * 10);
+    B->n = 10
     B->i = 0
     return B;
 }
@@ -32,8 +32,9 @@ void buffer_destroy(Buffer *B) {
 */
 void buffer_reset(Buffer *B) {
     free(B->data);
-    B->n = 0
-    B->i = 0
+    B->data = malloc(sizeof(char) * 10);
+    B->n = 10;
+    B->i = 0;
 }
 
 /*
@@ -41,8 +42,18 @@ void buffer_reset(Buffer *B) {
 */
 void buffer_push_back(Buffer *B, char c) {
     if (i == n) {
-        //malloc dobra n
+        char *temp_data, b;
+        n *= 2;
+        temp_data = malloc(sizeof(char) * n);
+        for (b = 0; b < (n/2); b++) {
+            (temp_data[b]) = (data[b]);
+        }
+        free(data);
+        //data = malloc(sizeof(char) * n); ACHO QUE TA ERRADO
+        data = temp_data;
     }
+    (B->data)[i] = c;
+    i++;
 }
 
 /*
@@ -56,9 +67,12 @@ void buffer_push_back(Buffer *B, char c) {
 */
 int read_line(FILE *input, Buffer *B) {
     buffer_reset(B);
-    while (!(\n or EOF))
+    char c;
+    c = getc(input);
+    while (c != '\n' && c != EOF))
         buffer_push_back(B, c);
-    if (\n)
+        c = getc(input);
+    if (c == '\n')
         buffer_push_back(B, c);
     return(B->i);
 }
