@@ -1,9 +1,9 @@
 CC=gcc
 CFLAGS=-Wall -std=c99 -O2
 
-all: symbol
+all: freq
 
-symbol: stable.o buffer.o error.o
+freq: main.c stable.o error.o
 	$(CC) $(CFLAGS) $^ -o $@
 stable.o: stable.c stable.h
 	$(CC) $(CFLAGS) -c $< -o $@
