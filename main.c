@@ -7,6 +7,12 @@
 #include "error.h"
 int max_size;
 
+/*
+  PrintInOrder function, given a key and a data it
+  prints the given key and data. It puts spaces between
+  the key and the data in the way that when it prints the
+  datas are printed starting from the same point.
+*/
 int PrintInOrder(const char *key, EntryData *data) {
     int i;
     if(key == NULL || data == NULL) return 0;
@@ -53,6 +59,6 @@ int main(int argc, char *argv[]) {
         }
     }
     stable_visit(table, PrintInOrder);
-    //stable_destroy(table);
+    stable_destroy(table);
     return 0;
 }
