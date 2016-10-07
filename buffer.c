@@ -74,5 +74,6 @@ int read_line(FILE *input, Buffer *B) {
         c = getc(input);
     if (c == '\n')
         buffer_push_back(B, c);
+    buffer_push_back(B, '\0');
     return(B->i);
 }
