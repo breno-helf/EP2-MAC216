@@ -37,6 +37,9 @@ void buffer_reset(Buffer *B) {
 */
 void buffer_push_back(Buffer *B, char c) {
     char *temp_data; int b;
+/*
+  if buffer is full, allocate more memory
+*/
     if (B->i == B->n) {
         B->n *= 2;
         temp_data = malloc(sizeof(char) * B->n);
@@ -69,6 +72,9 @@ int read_line(FILE *input, Buffer *B) {
     }
     if (c == '\n')
         buffer_push_back(B, c);
+/*
+  signs end of string
+*/
     buffer_push_back(B, '\0');
     return (B->i - 1);
 }
