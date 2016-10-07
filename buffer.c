@@ -1,12 +1,7 @@
 #include <stdio.h>
-
-// Buffer struct
-typedef struct buffer_s {
-  char *data;
-
-  // Buffer max. size and first free position.
-  int n, i;
-} Buffer;
+#include<stdlib.h>
+#include "buffer.h"
+#include "error.h"
 
 /*
   Create and return a new and empty buffer.
@@ -75,5 +70,5 @@ int read_line(FILE *input, Buffer *B) {
     if (c == '\n')
         buffer_push_back(B, c);
     buffer_push_back(B, '\0');
-    return(B->i);
+    return (B->i - 1);
 }

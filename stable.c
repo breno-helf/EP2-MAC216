@@ -60,14 +60,14 @@ SymbolTable stable_create() {
 
 void stable_destroy(SymbolTable table) {
     int i;
-    if(table->relation != NULL) free(table->relation);
+    //if(table->relation != NULL) free(table->relation);
     /*if(table->elements != NULL) free(table->elements);
     for(i = 0; i < TABLE_SIZE; i++) {
         if(table->str[i] == NULL) continue;
         free(table->str[i]);
     }
     if(table->str != NULL) free(table->str);
-    if(table != NULL) free(table); */
+    if(table != NULL) free(table);*/
 }
 
 InsertionResult stable_insert(SymbolTable table, const char *key) {
