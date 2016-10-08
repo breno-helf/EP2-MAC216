@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
         int i, j, size;
         char *word;
         word = malloc(sizeof(char)*(buffer->n));
-        if(word == NULL) die("!Out of memory");
+        if(word == NULL) die("!Out of memory 1");
         
         for(i = 0; buffer->data[i] != '\0'; i++) {
             size = 0;
@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
                 word[size++] = '\0';
                 i = j;
                 result = stable_insert(table, word);
-                free(result.data);
+                result.data->i++;
             }
         }
     }

@@ -14,7 +14,7 @@
   in the position of whose value is the hashing of k.
 */
 struct stable_s {
-    int *relation;
+    EntryData **relation;
     int *elements;
     char **str;
     int size;
@@ -52,12 +52,16 @@ SymbolTable stable_create() {
     table = malloc(sizeof(struct stable_s));
     if(table == NULL) die("!Out of memory");
 
-    table->relation = malloc((TABLE_SIZE + 5)*sizeof(int));
+    table->relation = malloc((TABLE_SIZE + 5)*sizeof(EntryData*));
     if(table->relation == NULL) die("!Out of memory");
+
+    for(i = 0; i <= TABLE_SIZE; i++) {
+        table->relation[i] = NULL;
+    }
     
     table->str = malloc((TABLE_SIZE + 5)*sizeof(char*));
     if(table->str == NULL) die("!Out of memory");
-    
+  
     table->size = 0;
     table->elements = malloc((TABLE_SIZE + 5)*sizeof(int));
     if(table->elements == NULL) die("!Out of memory");
@@ -100,17 +104,15 @@ void stable_destroy(SymbolTable table) {
 */
 InsertionResult stable_insert(SymbolTable table, const char *key) {
     InsertionResult result;
-    result.data = malloc(sizeof(EntryData));
-    if(result.data == NULL) die("!Out of memory");
     int s_hash = get_hash(key);
     int hash = s_hash;
-    if(table->relation[hash] > 0) {
-        while(table->relation[hash] && strcmp(table->str[hash], key)) {
+    if(table->relation[hash] != NULL) {
+        while((table->relation[hash] != NULL) && strcmp(table->str[hash], key)) {
             hash++;
             hash %= TABLE_SIZE;
             if(hash == s_hash) break;
         }
-        if(table->relation[hash] == 0) {
+        if(table->relation[hash] == NULL) {
             int size = strlen(key), i;
             table->str[hash] = malloc((size + 2)*sizeof(char));
             if(table->str[hash] == NULL) die("!Out of memory!");
@@ -119,14 +121,14 @@ InsertionResult stable_insert(SymbolTable table, const char *key) {
                 table->str[hash][i] = key[i];
 
             result.new = 1;
-            result.data->i = ++table->relation[hash];
+            table->relation[hash] = malloc(sizeof(EntryData));
+            result.data = table->relation[hash];
             table->elements[table->size++] = hash;
             return result;
         }
         else if(table->relation[hash] && (strcmp(table->str[hash], key) == 0)) {
             result.new = 0;
-            result.data->i = hash;
-            ++table->relation[hash];
+            result.data = table->relation[hash];
             return result;
         }
         else if(table->relation[hash] && strcmp(table->str[hash], key))
@@ -141,7 +143,8 @@ InsertionResult stable_insert(SymbolTable table, const char *key) {
             table->str[hash][i] = key[i];
 
         result.new = 1;
-        result.data->i = ++table->relation[hash];
+        table->relation[hash] = malloc(sizeof(EntryData));
+        result.data = table->relation[hash];
         table->elements[table->size++] = hash;
         return result;
     }
@@ -160,21 +163,18 @@ EntryData *stable_find(SymbolTable table, const char *key) {
     EntryData *result;
     int s_hash = get_hash(key);
     int hash = s_hash;
-    if(table->relation[hash] == 0) {
+    if(table->relation[hash] == NULL) {
         result = NULL;
         return result;
     }
     else {
-        while(table->relation[hash] && strcmp(table->str[hash], key)) {
+        while((table->relation[hash] != NULL) && strcmp(table->str[hash], key)) {
             hash++;
             hash %= TABLE_SIZE;
             if(hash == s_hash) break;
         }
         if((table->str[hash] != NULL) && !(strcmp(table->str[hash], key))) {
-            result = malloc(sizeof(EntryData));
-            if(result == NULL) die("!Out of memory");
-            
-            result->i = table->relation[hash]; 
+            result = table->relation[hash]; 
             return result;
         }
         else if(table->relation[hash] == 0 || strcmp(table->str[hash], key)) {
@@ -206,8 +206,6 @@ int order(const void *a, const void *b) {
 */
 int stable_visit(SymbolTable table, int (*visit)(const char *key, EntryData *data)) {
     int i = 0;
-    EntryData *entry;
-    entry = malloc(sizeof(EntryData));
     st = table;
     qsort(table->elements, table->size, sizeof(int), order);
     max_size = 0;
@@ -217,8 +215,7 @@ int stable_visit(SymbolTable table, int (*visit)(const char *key, EntryData *dat
     }
     i = 0;
     while(i < table->size){
-        entry->i = table->relation[table->elements[i]];
-        if(!(visit(table->str[table->elements[i]], entry))) {
+        if(!(visit(table->str[table->elements[i]], table->relation[table->elements[i]]))) {
             return 0;
         }
         i++;
