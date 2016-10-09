@@ -1,10 +1,11 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
-#include<ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 #include "stable.h"
 #include "buffer.h"
 #include "error.h"
+
 int max_size;
 
 /*
@@ -13,42 +14,43 @@ int max_size;
   the key and the data in the way that when it prints the
   datas are printed starting from the same point.
 */
-int PrintInOrder(const char *key, EntryData *data) {
+int PrintInOrder (const char *key, EntryData *data)
+{
     int i;
-    if(key == NULL || data == NULL) return 0;
+    if (key == NULL || data == NULL)  return 0;
     else {
         printf("%s", key);
-        for(i = strlen(key); i <= max_size; i++) {
+        for (i = strlen(key); i <= max_size; i++)
             putchar(' ');
-        }
         printf("%d\n", data->i);
         return 1;
     }
 }
 
-int main(int argc, char *argv[]) {
+int main (int argc, char *argv[])
+{
     SymbolTable table;
     FILE *in;
     Buffer *buffer = buffer_create();
     set_prog_name("Symbol Table");    
-    if(argc != 2)
-        die("Numero de argumentos errados");
+    if (argc != 2)
+        die("Numero de argumentos errado.");
         
     in = fopen(argv[1], "r");
 
     table = stable_create();
 
-    while(read_line(in, buffer)) {
+    while (read_line(in, buffer)) {
         InsertionResult result;
         int i, j, size;
         char *word;
-        word = malloc(sizeof(char)*(buffer->n));
-        if(word == NULL) die("!Out of memory 1");
+        word = emalloc(sizeof(char)*(buffer->n));
+        if (word == NULL)  die("!Out of memory 1");
         
-        for(i = 0; buffer->data[i] != '\0'; i++) {
+        for (i = 0; buffer->data[i] != '\0'; i++) {
             size = 0;
-            if(!isspace(buffer->data[i])) {
-                for(j = i; buffer->data[j] != '\0' && !(isspace(buffer->data[j])); j++) {
+            if (!isspace(buffer->data[i])) {
+                for (j = i; buffer->data[j] != '\0' && !(isspace(buffer->data[j])); j++) {
                     word[size++] = buffer->data[j];
                 }
                 word[size++] = '\0';

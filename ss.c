@@ -1,12 +1,12 @@
-SymbolTable* stable_create(){
-
+SymbolTable *stable_create ()
+{
 	SymbolTable *st;
-	st = malloc(sizeof(SymbolTable));
+	st = emalloc(sizeof(SymbolTable));
 	return st;
 };
 
-SymbolTable* stable_find(SymbolTable *st, const char *key){
-
+SymbolTable *stable_find (SymbolTable *st, const char *key)
+{
 	if (st == NULL)
 		return NULL;
 
@@ -20,8 +20,8 @@ SymbolTable* stable_find(SymbolTable *st, const char *key){
 		return st;
 }
 
-SymbolTable* stable_insert(SymbolTable *st, const char *key){
-
+SymbolTable *stable_insert (SymbolTable *st, const char *key)
+{
 	if (st == NULL){
 		SymbolTable *temp;
 		temp = stable_create();
@@ -29,6 +29,7 @@ SymbolTable* stable_insert(SymbolTable *st, const char *key){
 		temp->data.str = strdup(key);
 		return temp;
 	}
+	
 	if (strcmp(key, st->data.str) > 0)
 		st->right = stable_insert(st->right, key);
 
@@ -38,11 +39,10 @@ SymbolTable* stable_insert(SymbolTable *st, const char *key){
 	return st;
 }
 
-void printInOrder(SymbolTable *st){
-
-	if (st == NULL){
+void printInOrder (SymbolTable *st)
+{
+	if (st == NULL)
 		printf("");
-	}
 	else {
 		printInOrder(st->left);
 		printf("%s ", (st->data).str);
