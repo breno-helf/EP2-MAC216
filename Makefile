@@ -1,13 +1,33 @@
-CC=gcc
-CFLAGS=-Wall -std=c99 -O2 -g
+#
+# Breno Helfstein Moura       NUSP: 9790972
+# Lucas Daher                 NUSP: ?
+# Raphael dos Reis Gusmao     NUSP: 9778561
+#
 
-all: freq
+CFLAGS = -Wall -std=c99 -O2 
 
-freq: main.c stable.o error.o buffer.o
-	$(CC) $(CFLAGS) $^ -o $@
-stable.o: stable.c stable.h
+
+.PHONY: clean
+
+
+all: center freq
+
+
+center: center.o stable.o error.o buffer.o
+	$(CC) -o $@ $^
+
+
+freq: freq.c stable.o error.o buffer.o
+	$(CC) -o $@ $^
+
+
+%.o: %.c %.h
 	$(CC) $(CFLAGS) -c $< -o $@
-buffer.o: buffer.c buffer.h
+
+
+%.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
-error.o: error.c error.h
-	$(CC) $(CFLAGS) -c $< -o $@
+
+
+clean:
+	rm -f *.o *~ center freq
