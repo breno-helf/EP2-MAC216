@@ -10,10 +10,7 @@ int le_str(char *s, char *errptr) {
     }
     rotulo[j] = '\0';
     if (rotulo(rotulo, errptr) == 0) {      
-        /*
-		  Aqui imagino que não deva printar a mesma mensagem de erro
-		  duas vezes
-		*/
+		print_error_msg("Rotulo invalido");
         return 0;
     }
 	
@@ -24,6 +21,16 @@ int le_str(char *s, char *errptr) {
         mensagem de erro
         errprt*/
 
+	if((op = optable_find(rotulo)) != 0) {
+		rotulo = NULL;
+		/*
+		  preenche operador (?)
+		*/
+	} else {
+		print_error_msg("Rotulo ja existe");
+		errptr = rotulo;
+	}
+	
 	instr->label = rotulo;
     operador = malloc(sizeof(char) * 16);
     for(; s[i] == ' '; i++);
