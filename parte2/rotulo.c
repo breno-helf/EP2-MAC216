@@ -9,13 +9,15 @@ int rotulo(char *stg, char *errptr) {
     int i = 1, j;
     if (!(check_carac(stg[0])) {
         errptr = &stg[0];
-		die("Found a char that is not a number, letter or underscore");
+		print_error_msg("Found a char that is not a number, letter or underscore");
+		return 0;
     }
     while (stg[i] != '\0') {
         j = check_carac(stg[i]);
         if (!j) {
 			errptr = &stg[i];
-			die("Found a char that is not a number, letter or underscore");
+			print_error_msg("Found a char that is not a number, letter or underscore");
+			return 0;
         }
         i++;
     }

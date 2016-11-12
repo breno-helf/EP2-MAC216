@@ -9,15 +9,22 @@ int le_str(char *s, char *errptr) {
         j++; i++;
     }
     rotulo[j] = '\0';
-    rotulo(rotulo, errptr);
-
+    if (rotulo(rotulo, errptr) == 0) {      
+        /*
+		  Aqui imagino que não deva printar a mesma mensagem de erro
+		  duas vezes
+		*/
+        return 0;
+    }
+	
     /*se é operador:
         rotulo = NULL
         preenche operador
     se rótulo já existe:
         mensagem de erro
         errprt*/
-    instr->label = rotulo;
+
+	instr->label = rotulo;
     operador = malloc(sizeof(char) * 16);
     for(; s[i] == ' '; i++);
     j = 0;
