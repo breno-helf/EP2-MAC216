@@ -7,11 +7,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
-#include "error.h"
 #include "asmtypes.h"
-#include "stable.h"
-#include "buffer.h"
 #include "error.h"
+#include "stable.h"
+#include "parser.h"
+#include "buffer.h"
 
 int main (int argc, char *argv[])
 {
@@ -42,8 +42,8 @@ int main (int argc, char *argv[])
 				/* IS */
 				if (instr->op->opcode == IS) {
 					if(check_rotulo(instr->label, &errptr)) {
-						opd = operand_create_register(instr->opds[0]->value.reg);
-						res = stable_insert(alias_table, instr->label);
+						Operand* opd = operand_create_register(instr->opds[0]->value.reg);
+						InsertionResult res = stable_insert(alias_table, instr->label);
 						res.data->opd = opd;
 					} else {
 						printf("line %d: %s\n", line, buffer->data);
@@ -80,11 +80,7 @@ int main (int argc, char *argv[])
 		            }
 				}
 				printf("\n\n");
-			} else {
-				printf("label = n/a\n
-						operator = n/a\n
-						operands = n/a\n\n");
-			}
+			} else printf("label = n/a\noperator = n/a\noperands = n/a\n\n");
 		} else {
 			printf("line %d: %s\n", line, buffer->data);
 			printf("^\n");

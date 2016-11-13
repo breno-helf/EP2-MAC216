@@ -1,6 +1,6 @@
 /*
     Breno Helfstein Moura       NUSP: 9790972
-    Lucas Daher                 NUSP: ?
+    Lucas Daher                 NUSP: 8991769
     Raphael dos Reis Gusmao     NUSP: 9778561
 */
 #include <stdio.h>
@@ -67,21 +67,21 @@ SymbolTable stable_create ()
 
     for (i = 0; i <= TABLE_SIZE; i++)
         table->relation[i] = NULL;
-    
+
     table->str = emalloc((TABLE_SIZE + 5)*sizeof(char*));
     if (table->str == NULL)
         die("!Out of memory");
-  
+
     table->size = 0;
     table->elements = emalloc((TABLE_SIZE + 5)*sizeof(int));
     if (table->elements == NULL)
         die("!Out of memory");
-    
+
     for (i = 0; i <= TABLE_SIZE; i++) {
         table->relation[i] = 0;
         table->str[i] = NULL;
     }
-    
+
     return table;
 }
 
@@ -103,7 +103,7 @@ void stable_destroy (SymbolTable table)
 
 /*
   Insert a new entry on the symbol table given its key.
-  
+
   To insert an entry it hash de string and inserts using linear
   probing.
 
@@ -131,7 +131,7 @@ InsertionResult stable_insert (SymbolTable table, const char *key)
             table->str[hash] = emalloc((size + 2)*sizeof(char));
             if (table->str[hash] == NULL)
                 die("!Out of memory!");
-            
+
             for (i = 0; i <= size; i++)
                 table->str[hash][i] = key[i];
 
@@ -153,7 +153,7 @@ InsertionResult stable_insert (SymbolTable table, const char *key)
         table->str[hash] = emalloc((size + 2)*sizeof(char));
         if(table->str[hash] == NULL)
             die("!Out of memory!");
-        
+
         for(i = 0; i <= size; i++)
             table->str[hash][i] = key[i];
 
@@ -189,7 +189,7 @@ EntryData *stable_find (SymbolTable table, const char *key)
             if (hash == s_hash)  break;
         }
         if ((table->str[hash] != NULL) && !(strcmp(table->str[hash], key))) {
-            result = table->relation[hash]; 
+            result = table->relation[hash];
             return result;
         } else if (table->relation[hash] == 0 || strcmp(table->str[hash], key)) {
             result = NULL;
