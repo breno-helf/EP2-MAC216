@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include "asmtypes.h"
 #include "error.h"
+#include "stable.h"
+#include "optable.h"
 
 int check_carac (char c) {
 /*checa se o caracter é letra, número ou _, devolve 1 se sim, 0 caso contrário*/
@@ -35,7 +37,9 @@ int le_str(char *s, char *errptr, SymbolTable table) {
     char *rotulo, *operador, *operand, **opd_read;
     Operator *op;
 	Operand **opd;
-    int i, j = 0, a;
+    int i, j, a;
+	
+	j = 0;
 	opd = malloc(3 * sizeof(Operand *));
 	for(i = 0; i < 3; i++)
 		opd[i] = malloc(sizeof(Operand));
@@ -54,7 +58,7 @@ int le_str(char *s, char *errptr, SymbolTable table) {
         errptr = rotulo;
         return 0;
     }
-    }
+	
     rotulo[j] = '\0';
     if (rotulo(rotulo, errptr) == 0) {      
 		printf("Rotulo %s invalido\n", rotulo);
@@ -92,7 +96,9 @@ int le_str(char *s, char *errptr, SymbolTable table) {
 		return 0;
 	}
 
-	operando:for(; s[i] == ' '; i++);
+ operando:
+
+	for(; s[i] == ' '; i++);
     if (instr->op->opds[0].type != OP_NONE) {
 	    j = 0;
         while (s[i] != ' ' && s[i] != '\0' && s[i] != ',') {
