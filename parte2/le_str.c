@@ -13,24 +13,23 @@ int le_str(char *s, char *errptr) {
 		print_error_msg("Rotulo invalido");
         return 0;
     }
-	
-    /*se é operador:
-        rotulo = NULL
-        preenche operador
-    se rótulo já existe:
-        mensagem de erro
-        errprt*/
-
+    /* AQUI BRENO */
 	if((op = optable_find(rotulo)) != 0) {
+		for (a = 0; a < 16; a++)
+            op->name[a] = rotulo[a];
+        op->opcode = 
+        op->opd_types[0] = 
+        op->opd_types[1] = 
+        op->opd_types[2] = 
+        instr->op = op
 		rotulo = NULL;
-		/*
-		  preenche operador (?)
-		*/
-	} else {
+		
+	}
+	if rotulo ja existe /*NAO SEI ONDE VERIFICA ISSO*/ {
 		print_error_msg("Rotulo ja existe");
 		errptr = rotulo;
 	}
-	
+	/*acaba aqui*/
 	instr->label = rotulo;
     operador = malloc(sizeof(char) * 16);
     for(; s[i] == ' '; i++);
