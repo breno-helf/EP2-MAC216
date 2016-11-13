@@ -1,4 +1,4 @@
-int le_str(char *s, char *errptr) {
+int le_str(char *s, char *errptr, SymbolTable table) {
     char *rotulo, *operador;
     Operator *op;
     int i, j = 0, a;
@@ -25,7 +25,7 @@ int le_str(char *s, char *errptr) {
 		rotulo = NULL;
 		
 	}
-	if rotulo ja existe /*NAO SEI ONDE VERIFICA ISSO*/ {
+	if(stable_find(table, rotulo) != NULL) {
 		print_error_msg("Rotulo ja existe");
 		errptr = rotulo;
 	}
@@ -38,14 +38,15 @@ int le_str(char *s, char *errptr) {
         operador[j] = s[i];
         j++; i++;
     }
-    /*se é operador:*/
-        for (a = 0; a < 16; a++)
+	if((op = optable_find(rotulo)) != 0) {
+		for (a = 0; a < 16; a++)
             op->name[a] = operador[a];
         op->opcode = 
         op->opd_types[0] = 
         op->opd_types[1] = 
         op->opd_types[2] = 
         instr->op = op
+			
     /*se não é operador:
         mensagem de erro
         errprt*/
