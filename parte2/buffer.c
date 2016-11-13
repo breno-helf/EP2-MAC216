@@ -1,6 +1,6 @@
 /*
     Breno Helfstein Moura       NUSP: 9790972
-    Lucas Daher                 NUSP: ?
+    Lucas Daher                 NUSP: 8991769
     Raphael dos Reis Gusmao     NUSP: 9778561
 */
 #include <stdio.h>
@@ -13,53 +13,67 @@
 */
 Buffer *buffer_create ()
 {
-    Buffer *B = emalloc(sizeof(Buffer));
-    B->data = emalloc(sizeof(char) * 1024);
-    B->n = 1024;
-    B->i = 0;
-    return B;
+    Buffer *buffer;
+    buffer = malloc(sizeof(Buffer));
+    if (buffer == NULL) {
+        printf("Out of memory!\n");
+        exit(1);
+    }
+    buffer->data = malloc(sizeof(char) * 1024);
+    if (buffer->data == NULL) {
+        printf("Out of memory!\n");
+        exit(1);
+    }
+    buffer->n = 1024;
+    buffer->i = 0;
+    return buffer;
 }
 
 /*
   Destroy a buffer.
 */
-void buffer_destroy (Buffer *B)
+void buffer_destroy (Buffer *buffer)
 {
-    free(B->data);
-    free(B);
+    free(buffer->data);
+    free(buffer);
 }
 
 /*
   Reset buffer, eliminating contents.
 */
-void buffer_reset (Buffer *B)
+void buffer_reset (Buffer *buffer)
 {
-    free(B->data);
-    B->data = emalloc(sizeof(char) * 1024);
-    B->n = 1024;
-    B->i = 0;
+    free(buffer->data);
+    buffer->data = malloc(sizeof(char) * 1024);
+    if (buffer->data == NULL) {
+        printf("Out of memory!\n");
+        exit(1);
+    }
+    buffer->n = 1024;
+    buffer->i = 0;
 }
 
 /*
   Add a character c to the end of the buffer.
 */
-void buffer_push_back (Buffer *B, char c)
+void buffer_push_back (Buffer *buffer, char c)
 {
-    char *temp_data; int b;
-    /*
-      if buffer is full, allocate more memory
-    */
-    if (B->i == B->n) {
-        B->n *= 2;
-        temp_data = emalloc(sizeof(char) * B->n);
-        for (b = 0; b < ((B->n)/2); b++) {
-            (temp_data[b]) = (B->data[b]);
+    if (buffer->i == buffer->n) {
+        Buffer *newBuffer;
+        newBuffer = malloc(sizeof(Buffer) * 2 * buffer->n);
+        if (newBuffer == NULL) {
+            printf("Out of memory!\n");
+            exit(1);
         }
-        free(B->data);
-        B->data = temp_data;
+        int j;
+        for (j = 0; j < buffer->i; j++)
+            newBuffer->data[j] = buffer->data[j];
+        newBuffer->i = j;
+        newBuffer->n = 2 * buffer->n;
+        buffer_destroy(buffer);
+        buffer = newBuffer;
     }
-    (B->data)[B->i] = c;
-    B->i++;
+    buffer->data[buffer->i++] = c;
 }
 
 /*
@@ -71,20 +85,14 @@ void buffer_push_back (Buffer *B, char c)
   Returns the number of characters read; in particular, returns ZERO
   if end-of-file is reached before any characters are read.
 */
-int read_line (FILE *input, Buffer *B)
+int read_line (FILE *input, Buffer *buffer)
 {
-    buffer_reset(B);
-    char c;
-    c = getc(input);
-    while (c != '\n' && c != EOF) {
-        buffer_push_back(B, c);
+    buffer_reset(buffer);
+    char c = getc(input);
+    while (c != '\n' && c != EOF && c != ';') {
+        buffer_push_back(buffer, c);
         c = getc(input);
     }
-    if (c == '\n')
-        buffer_push_back(B, c);
-    /*
-      signs end of string
-    */
-    buffer_push_back(B, '\0');
-    return (B->i - 1);
+    buffer_push_back(buffer, '\0');
+    return (buffer->i - 1);
 }
