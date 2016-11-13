@@ -43,11 +43,17 @@ int le_str(char *s, char *errptr, SymbolTable table) {
 	for(i = 0; i < 3; i++)
 		opd_read[i] = malloc(sizeof(char) * 16);
 	
-    rotulo = malloc(sizeof(char) * 20);
+    rotulo = malloc(sizeof(char) * 16);
     for(i = 0; s[i] == ' '; i++);
-    while (s[i] != ' ' && s[i] != '\0') {
+    while (s[i] != ' ' && s[i] != '\0' && j < 16) {
         rotulo[j] = s[i];
         j++; i++;
+    }
+    if (j == 16) {
+        printf("Rotulo %s invalido\n", rotulo);
+        errptr = rotulo;
+        return 0;
+    }
     }
     rotulo[j] = '\0';
     if (rotulo(rotulo, errptr) == 0) {      
@@ -57,7 +63,8 @@ int le_str(char *s, char *errptr, SymbolTable table) {
 
 	if((op = optable_find(rotulo)) != 0) {
         instr->op = op; /* A funcao optable_find ja faz isso */
-		rotulo = NULL;		
+		rotulo = NULL;
+        goto operando;
 	}
 
 	if(stable_find(table, rotulo) != NULL) {
@@ -77,7 +84,6 @@ int le_str(char *s, char *errptr, SymbolTable table) {
 
 	if((op = optable_find(operador)) != 0) {
         instr->op = op;
-        goto operando;
 	}
 			
 	else {
