@@ -32,13 +32,16 @@ int rotulo(char *stg, char *errptr) {
 }
 
 int le_str(char *s, char *errptr, SymbolTable table) {
-    char *rotulo, *operador, *operand;
+    char *rotulo, *operador, *operand, **opd_read;
     Operator *op;
 	Operand **opd;
     int i, j = 0, a;
-	opd = malloc(3*sizeof(Operand *));
+	opd = malloc(3 * sizeof(Operand *));
 	for(i = 0; i < 3; i++)
 		opd[i] = malloc(sizeof(Operand));
+    opd_read = malloc(3 * sizeof(char *));
+	for(i = 0; i < 3; i++)
+		opd_read[i] = malloc(sizeof(char) * 16);
 	
     rotulo = malloc(sizeof(char) * 20);
     for(i = 0; s[i] == ' '; i++);
@@ -56,12 +59,14 @@ int le_str(char *s, char *errptr, SymbolTable table) {
         instr->op = op; /* A funcao optable_find ja faz isso */
 		rotulo = NULL;		
 	}
-	if(stable_find(table, rotulo) != NULL) {
-		printf("Rotulo %s ja existe\n", rotulo);
-		errptr = rotulo;
-	}
 
-	instr->label = rotulo;
+	if(stable_find(table, rotulo) != NULL) {
+        printf("Rotulo %s ja existe\n", rotulo);
+        errptr = rotulo;
+        return 0;
+    }
+
+    instr->label = rotulo;
     operador = malloc(sizeof(char) * 16);
     for(; s[i] == ' '; i++);
     j = 0;
@@ -72,33 +77,68 @@ int le_str(char *s, char *errptr, SymbolTable table) {
 
 	if((op = optable_find(operador)) != 0) {
         instr->op = op;
+        goto operando;
 	}
 			
 	else {
 		printf("%s Nao eh operador\n", operador);
 		errptr = operador;
+		return 0;
 	}
 
-	for(; s[i] == ' '; i++);
-    j = 0;
-    while (s[i] != ' ' && s[i] != '\0' && s[i] != ',') {
-        operand[j] = s[i];
-        j++; i++;
+	operando:for(; s[i] == ' '; i++);
+    if (instr->op->opds[0].type != OP_NONE) {
+	    j = 0;
+        while (s[i] != ' ' && s[i] != '\0' && s[i] != ',') {
+            opd_read[0][j] = s[i];
+            j++; i++;
+        }
+        if (operando(opd_read[0], instr->op->opds[0].type) == 0) {
+            printf("Operando %s invalido\n", opd_read[0]);
+            errptr = opd_read[0];
+            return 0;
+        }
+        instr->op->opds[0].value = opd_read[0]; //ARRUMAR!!!
     }
+    if (instr->op->opds[1].type != OP_NONE) {
+	    for(; s[i] == ' ' || s[i] == ','; i++);
+	    j = 0;
+        while (s[i] != ' ' && s[i] != '\0' && s[i] != ',') {
+            opd_read[1][j] = s[i];
+            j++; i++;
+        }
+        if (operando(opd_read[1], instr->op->opds[1].type) == 0) {
+            printf("Operando %s invalido\n", opd_read[1]);
+            errptr = opd_read[1];
+            return 0;
+        }
+        instr->op->opds[1].value = opd_read[1]; //ARRUMAR!!!
+    }
+    if (instr->op->opds[2].type != OP_NONE) {
+	    for(; s[i] == ' ' || s[i] == ','; i++);
+	    j = 0;
+        while (s[i] != ' ' && s[i] != '\0' && s[i] != ',') {
+            opd_read[2][j] = s[i];
+            j++; i++;
+        }
+        if (operando(opd_read[2], instr->op->opds[2].type) == 0) {
+            printf("Operando %s invalido\n", opd_read[2]);
+            errptr = opd_read[2];
+            return 0;
+        }
+        instr->op->opds[2].value = opd_read[2]; //ARRUMAR!!!
+    }
+    for(; s[i] != '\0' || s[i] != '*'; i++)
+        if (s[i] != ' ' || s[i] != '\n') {
+            printf("Erro de sintaxe: %c\n", s[i]);
+            errptr = &(s[i]);
+            return 0;
+        }
+    return 1;
 }
 
 int parse(const char *s, SymbolTable alias_table, Instruction **instr, const char **errptr) {
 	/*
-	  Aqui fica o monstro
+	  Aqui fica o monstro BIRRRL
 	*/		
 }
-
-
-
-
-
-
-
-
-
-
