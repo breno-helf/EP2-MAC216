@@ -7,7 +7,7 @@ int check_carac (char c) {
 
 int rotulo(char *stg, char *errptr) {
     int i = 1, j;
-    if (!(check_carac(stg[0])) {
+    if (!(check_carac(stg[0]))) {
         errptr = &stg[0];
 		printf("Econtrado char %c que nao eh numero, letra ou underscore\n", stg[0]);
 		return 0;
