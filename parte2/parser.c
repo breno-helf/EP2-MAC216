@@ -173,10 +173,3 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr, const cha
         }
     return 1;
 }
-
-int parse(const char *s, SymbolTable alias_table, Instruction **instr, const char **errptr) {
-	/*
-	  Aqui fica o monstro BIRRRL
-	*/
-    return 0;
-}
