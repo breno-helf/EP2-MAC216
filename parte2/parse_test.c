@@ -41,7 +41,7 @@ int main (int argc, char *argv[])
 			if (instr != NULL) {
 				/* IS */
 				if (instr->op->opcode == IS) {
-					if(rotulo(instr->label, &errptr)) {
+					if(check_rotulo(instr->label, &errptr)) {
 						opd = operand_create_register(instr->opds[0]->value.reg);
 						res = stable_insert(alias_table, instr->label);
 						res.data->opd = opd;
