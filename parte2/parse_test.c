@@ -15,6 +15,7 @@
 
 int main (int argc, char *argv[])
 {
+	int line;
 	FILE *in;
 	Buffer *buffer;
 	SymbolTable alias_table;
@@ -29,37 +30,40 @@ int main (int argc, char *argv[])
 	buffer = buffer_create();
 	alias_table = stable_create();
 
+	line = 0;
 	while (read_line(in, buffer)) {
 		const char *errptr;
 		Instruction *instr;
-
-		/*instr = malloc(sizeof(Instruction));
-		errptr = malloc(sizeof(char));*/
-
+		line++;
 		if (parse(buffer->data, alias_table, &instr, &errptr)) {
 			/* Line */
 			printf("line = %s\n", buffer->data);
-
 			if (instr != NULL) {
+				/* IS */
 				if (instr->op->opcode == IS) {
-					
+					if(rotulo(instr->label, &errptr)) {
+						opd = operand_create_register(instr->opds[0]->value.reg);
+						res = stable_insert(alias_table, instr->label);
+						res.data->opd = opd;
+					} else {
+						printf("line %d: %s\n", line, buffer->data);
+						printf("^\n");
+						exit(1);
+					}
 				}
-
 				/* Label */
 				if (instr->label != NULL)
 					printf("label = \"%s\"\n", instr->label);
 				else
 					printf("label = n/a\n");
-
 				/* Operator */
 				printf("operator = %s\n", instr->op->name);
-
 				/* Operands */
 				printf("operands = ");
 				for (int i = 0; i < 3; i++) {
 					if (instr->opds[i]) {
 		                if (i != 0) printf(", ");
-		                switch (instr[l]->opds[i]->type) {
+		                switch (instr->opds[i]->type) {
 							case NUMBER_TYPE:
 			                    printf("Number(%lld)", instr->opds[i]->value.num);
 			                    break;
@@ -67,7 +71,7 @@ int main (int argc, char *argv[])
 			                    printf("Label(\"%s\")", instr->opds[i]->value.label);
 			                    break;
 							case STRING:
-			                    printf("String(%s)", instr->opds[i]->value.str);
+			                    printf("String(\"%s\")", instr->opds[i]->value.str);
 			                    break;
 			                case REGISTER:
 			                    printf("Register(%u)", instr->opds[i]->value.reg);
@@ -82,9 +86,14 @@ int main (int argc, char *argv[])
 						operands = n/a\n\n");
 			}
 		} else {
-			/* Deu erro!!! */
-			break;
+			printf("line %d: %s\n", line, buffer->data);
+			printf("^\n");
+			exit(1);
 		}
 	}
+
+	buffer_destroy(buffer);
+	stable_destroy(alias_table);
+
 	return 0;
 }
