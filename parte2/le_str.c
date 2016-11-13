@@ -1,7 +1,12 @@
 int le_str(char *s, char *errptr, SymbolTable table) {
-    char *rotulo, *operador;
+    char *rotulo, *operador, *operand;
     Operator *op;
+	Operand **opd;
     int i, j = 0, a;
+	opd = malloc(3*sizeof(Operand *));
+	for(i = 0; i < 3; i++)
+		opd[i] = malloc(sizeof(Operand));
+	
     rotulo = malloc(sizeof(char) * 20);
     for(i = 0; s[i] == ' '; i++);
     while (s[i] != ' ' && s[i] != '\0') {
@@ -32,18 +37,19 @@ int le_str(char *s, char *errptr, SymbolTable table) {
         j++; i++;
     }
 
-	if((op = optable_find(operador)) != 0) { /* Aqui nao sei se eh
-												Operador ou rotulo
-											 */
+	if((op = optable_find(operador)) != 0) {
         instr->op = op;
-		rotulo = NULL;
 	}
 			
 	else {
-		printf("%s Nao eh operador\n", operador); /* Arruma aqui dps
-													 de arrumar ali
-													 em cima
-												  */
+		printf("%s Nao eh operador\n", operador);
 		errptr = operador;
 	}
+
+	for(; s[i] == ' '; i++);
+    j = 0;
+    while (s[i] != ' ' && s[i] != '\0' && s[i] != ',') {
+        operand[j] = s[i];
+        j++; i++;
+    }
 }
