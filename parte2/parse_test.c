@@ -84,6 +84,7 @@ int main (int argc, char *argv[])
 		} else {
 			printf("line %d: %s\n", line, buffer->data);
 			printf("^\n");
+			print_error_msg(NULL);
 			exit(1);
 		}
 	}

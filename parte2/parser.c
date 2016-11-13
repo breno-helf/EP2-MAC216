@@ -2,11 +2,11 @@
 #include <string.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <ctype.h>
 #include "asmtypes.h"
 #include "error.h"
 #include "stable.h"
 #include "optable.h"
-
 /*
     Checa se o caracter eh letra, numero ou _
 */
@@ -18,16 +18,16 @@ int check_carac (char c)
 int check_rotulo (char *stg, char *errptr)
 {
     int i = 1, j;
-    if (!(check_carac(stg[0]))) {
+    if (!(isalpha(stg[0]) || stg[0] == 95) {
         errptr = &stg[0];
-		printf("Econtrado char %c que nao eh numero, letra ou underscore\n", stg[0]);
+		set_error_msg("primeiro char nao eh letra ou underscore");
 		return 0;
     }
     while (stg[i] != '\0') {
         j = check_carac(stg[i]);
         if (!j) {
 			errptr = &stg[i];
-			printf("Encontrado char %c que nao eh numero, letra ou underscore", stg[i]);
+			set_error_msg("Encontrado char que nao eh numero, letra ou underscore");
 			return 0;
         }
         i++;
@@ -57,14 +57,14 @@ int le_str (char *s, char *errptr, SymbolTable table, Instruction *instr)
         j++; i++;
     }
     if (j == 16) {
-        printf("Rotulo %s invalido\n", rotulo);
+        set_error_msg("Rotulo invalido");
         errptr = rotulo;
         return 0;
     }
 
     rotulo[j] = '\0';
     if (check_rotulo(rotulo, errptr) == 0) {
-		printf("Rotulo %s invalido\n", rotulo);
+		set_error_msg("Rotulo invalido");
         return 0;
     }
 
@@ -75,7 +75,7 @@ int le_str (char *s, char *errptr, SymbolTable table, Instruction *instr)
 	}
 
 	if (stable_find(table, rotulo) != NULL) {
-        printf("Rotulo %s ja existe\n", rotulo);
+        set_error_msg("Rotulo ja existe");
         errptr = rotulo;
         return 0;
     }
@@ -94,7 +94,7 @@ int le_str (char *s, char *errptr, SymbolTable table, Instruction *instr)
 	}
 
 	else {
-		printf("%s Nao eh operador\n", operador);
+		set_error_msg("Nao eh operador");
 		errptr = operador;
 		return 0;
 	}
@@ -167,7 +167,7 @@ int le_str (char *s, char *errptr, SymbolTable table, Instruction *instr)
     }
     for (; s[i] != '\0' || s[i] != '*'; i++)
         if (s[i] != ' ' || s[i] != '\n') {
-            printf("Erro de sintaxe: %c\n", s[i]);
+            set_error_msg("Erro de sintaxe");
             errptr = &(s[i]);
             return 0;
         }
