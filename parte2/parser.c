@@ -35,7 +35,7 @@ int check_rotulo (char *stg, char *errptr)
     return 1;
 }
 
-int le_str (char *s, char *errptr, SymbolTable table, Instruction *instr)
+int parse(const char *s, SymbolTable alias_table, Instruction **instr, const char **errptr) {
 {
     char *rotulo, *operador, *operand, **opd_read;
     Operator *op;
@@ -74,7 +74,7 @@ int le_str (char *s, char *errptr, SymbolTable table, Instruction *instr)
         goto operando;
 	}
 
-	if (stable_find(table, rotulo) != NULL) {
+	if (stable_find(alias_table, rotulo) != NULL) {
         set_error_msg("Rotulo ja existe");
         errptr = rotulo;
         return 0;
