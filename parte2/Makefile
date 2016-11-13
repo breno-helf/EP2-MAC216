@@ -11,7 +11,8 @@ OBJS = parse_test.o parser.o stable.o optable.o error.o buffer.o asmtypes.o # op
 all: parser
 
 parser: $(OBJS)
-	$(CC) -o $@ $^
+	$(CC) $^ -o $@
+	make clean
 
 %.o: %.c %.h
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -20,4 +21,4 @@ parser: $(OBJS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	-rm -f *.o *~ parser
+	-rm -f *.o *~
