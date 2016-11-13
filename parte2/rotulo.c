@@ -9,14 +9,14 @@ int rotulo(char *stg, char *errptr) {
     int i = 1, j;
     if (!(check_carac(stg[0])) {
         errptr = &stg[0];
-		print_error_msg("Econtrado char que nao eh numero, letra ou underscore");
+		printf("Econtrado char %c que nao eh numero, letra ou underscore\n", stg[0]);
 		return 0;
     }
     while (stg[i] != '\0') {
         j = check_carac(stg[i]);
         if (!j) {
 			errptr = &stg[i];
-			print_error_msg("Encontrado char que nao eh numero, letra ou underscore");
+			printf("Encontrado char %c que nao eh numero, letra ou underscore", stg[i]);
 			return 0;
         }
         i++;

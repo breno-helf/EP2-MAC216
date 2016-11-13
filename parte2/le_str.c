@@ -10,26 +10,19 @@ int le_str(char *s, char *errptr, SymbolTable table) {
     }
     rotulo[j] = '\0';
     if (rotulo(rotulo, errptr) == 0) {      
-		print_error_msg("Rotulo invalido");
+		printf("Rotulo %s invalido\n", rotulo);
         return 0;
     }
-    /* AQUI BRENO */
+
 	if((op = optable_find(rotulo)) != 0) {
-		for (a = 0; a < 16; a++)
-            op->name[a] = rotulo[a];
-        op->opcode = 
-        op->opd_types[0] = 
-        op->opd_types[1] = 
-        op->opd_types[2] = 
-        instr->op = op
-		rotulo = NULL;
-		
+        instr->op = op; /* A funcao optable_find ja faz isso */
+		rotulo = NULL;		
 	}
 	if(stable_find(table, rotulo) != NULL) {
-		print_error_msg("Rotulo ja existe");
+		printf("Rotulo %s ja existe\n", rotulo);
 		errptr = rotulo;
 	}
-	/*acaba aqui*/
+
 	instr->label = rotulo;
     operador = malloc(sizeof(char) * 16);
     for(; s[i] == ' '; i++);
@@ -38,16 +31,19 @@ int le_str(char *s, char *errptr, SymbolTable table) {
         operador[j] = s[i];
         j++; i++;
     }
-	if((op = optable_find(rotulo)) != 0) {
-		for (a = 0; a < 16; a++)
-            op->name[a] = operador[a];
-        op->opcode = 
-        op->opd_types[0] = 
-        op->opd_types[1] = 
-        op->opd_types[2] = 
-        instr->op = op
+
+	if((op = optable_find(operador)) != 0) { /* Aqui nao sei se eh
+												Operador ou rotulo
+											 */
+        instr->op = op;
+		rotulo = NULL;
+	}
 			
-    /*se não é operador:
-        mensagem de erro
-        errprt*/
+	else {
+		printf("%s Nao eh operador\n", operador); /* Arruma aqui dps
+													 de arrumar ali
+													 em cima
+												  */
+		errptr = operador;
+	}
 }
