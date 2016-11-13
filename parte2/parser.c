@@ -14,7 +14,7 @@ int check_carac (char c) {
     return 0;
 }
 
-int rotulo(char *stg, char *errptr) {
+int check_rotulo(char *stg, char *errptr) {
     int i = 1, j;
     if (!(check_carac(stg[0]))) {
         errptr = &stg[0];
@@ -33,7 +33,7 @@ int rotulo(char *stg, char *errptr) {
     return 1;
 }
 
-int le_str(char *s, char *errptr, SymbolTable table) {
+int le_str(char *s, char *errptr, SymbolTable table, Instruction *instr) {
     char *rotulo, *operador, *operand, **opd_read;
     Operator *op;
 	Operand **opd;
@@ -60,7 +60,7 @@ int le_str(char *s, char *errptr, SymbolTable table) {
     }
 	
     rotulo[j] = '\0';
-    if (rotulo(rotulo, errptr) == 0) {      
+    if (check_rotulo(rotulo, errptr) == 0) {      
 		printf("Rotulo %s invalido\n", rotulo);
         return 0;
     }
@@ -97,48 +97,70 @@ int le_str(char *s, char *errptr, SymbolTable table) {
 	}
 
  operando:
-
+    for (a = 0; a < 3; a++)
+        instr->opds[a]->type = instr->op->opd_types[a];
 	for(; s[i] == ' '; i++);
-    if (instr->op->opds[0].type != OP_NONE) {
+    if (instr->opds[0]->type != OP_NONE) {
 	    j = 0;
         while (s[i] != ' ' && s[i] != '\0' && s[i] != ',') {
             opd_read[0][j] = s[i];
             j++; i++;
         }
-        if (operando(opd_read[0], instr->op->opds[0].type) == 0) {
-            printf("Operando %s invalido\n", opd_read[0]);
-            errptr = opd_read[0];
-            return 0;
+        if(instr->opds[0]->type == LABEL) {
+        	instr->opds[0] = operand_create_label(opd_read[0]);
+
+        } else if(instr->opds[0]->type == REGISTER) {
+            instr->opds[0] = operand_create_register(atoi(opd_read[0]));
+
+        } else if(instr->opds[0]->type == STRING) {
+        	instr->opds[0] = operand_create_string(opd_read[0]);
+
+        } else if(instr->opds[0]->type == NUMBER_TYPE) {
+        	instr->opds[0] = operand_create_number(atoi(opd_read[0]));
+
         }
-        instr->op->opds[0].value = opd_read[0]; //ARRUMAR!!!
     }
-    if (instr->op->opds[1].type != OP_NONE) {
+    if (instr->opds[1]->type != OP_NONE) {
 	    for(; s[i] == ' ' || s[i] == ','; i++);
 	    j = 0;
         while (s[i] != ' ' && s[i] != '\0' && s[i] != ',') {
             opd_read[1][j] = s[i];
             j++; i++;
         }
-        if (operando(opd_read[1], instr->op->opds[1].type) == 0) {
-            printf("Operando %s invalido\n", opd_read[1]);
-            errptr = opd_read[1];
-            return 0;
+        if(instr->opds[1]->type == LABEL) {
+        	instr->opds[1] = operand_create_label(opd_read[1]);
+
+        } else if(instr->opds[1]->type == REGISTER) {
+            instr->opds[1] = operand_create_register(atoi(opd_read[1]));
+
+        } else if(instr->opds[1]->type == STRING) {
+        	instr->opds[1] = operand_create_string(opd_read[1]);
+
+        } else if(instr->opds[1]->type == NUMBER_TYPE) {
+        	instr->opds[1] = operand_create_number(atoi(opd_read[1]));
+
         }
-        instr->op->opds[1].value = opd_read[1]; //ARRUMAR!!!
     }
-    if (instr->op->opds[2].type != OP_NONE) {
+    if (instr->opds[2]->type != OP_NONE) {
 	    for(; s[i] == ' ' || s[i] == ','; i++);
 	    j = 0;
         while (s[i] != ' ' && s[i] != '\0' && s[i] != ',') {
             opd_read[2][j] = s[i];
             j++; i++;
         }
-        if (operando(opd_read[2], instr->op->opds[2].type) == 0) {
-            printf("Operando %s invalido\n", opd_read[2]);
-            errptr = opd_read[2];
-            return 0;
+        if(instr->opds[2]->type == LABEL) {
+        	instr->opds[2] = operand_create_label(opd_read[2]);
+
+        } else if(instr->opds[2]->type == REGISTER) {
+            instr->opds[2] = operand_create_register(atoi(opd_read[2]));
+
+        } else if(instr->opds[2]->type == STRING) {
+        	instr->opds[2] = operand_create_string(opd_read[2]);
+
+        } else if(instr->opds[2]->type == NUMBER_TYPE) {
+        	instr->opds[2] = operand_create_number(atoi(opd_read[2]));
+
         }
-        instr->op->opds[2].value = opd_read[2]; //ARRUMAR!!!
     }
     for(; s[i] != '\0' || s[i] != '*'; i++)
         if (s[i] != ' ' || s[i] != '\n') {
