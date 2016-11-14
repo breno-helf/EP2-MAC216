@@ -4,14 +4,14 @@
 # Raphael dos Reis Gusmao     NUSP: 9778561
 #
 
-CFLAGS = -Wall -std=c99 -O2
+CFLAGS = -Wall -std=c99 -O2 -g
 OBJS = parse_test.o parser.o stable.o optable.o error.o buffer.o asmtypes.o # opcodes.o
 .PHONY: clean
 
 all: parser
 
 parser: $(OBJS)
-	$(CC) $^ -o $@
+	$(CC) $(CFLAGS) $^ -o $@
 	make clean
 
 %.o: %.c %.h
