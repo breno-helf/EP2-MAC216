@@ -7,11 +7,39 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <ctype.h>
 #include "asmtypes.h"
 #include "error.h"
 #include "stable.h"
 #include "parser.h"
 #include "buffer.h"
+
+int check_char (char c)
+{
+    return ((c > 64 && c < 91) || (c == 95) || (c > 96 && c < 123) || (c > 47 && c < 58));
+}
+
+
+int chk_rotulo(char *stg, const char *errptr)
+{
+    int i = 1, j;
+    if (!(isalpha(stg[0]) || stg[0] == 95)) {
+        errptr = &stg[0];
+		set_error_msg("primeiro char nao eh letra ou underscore");
+		return 0;
+    }
+    while (stg[i] != '\0') {
+        j = check_char(stg[i]);
+        if (!j) {
+			errptr = &stg[i];
+			set_error_msg("Encontrado char que nao eh numero, letra ou underscore");
+			return 0;
+        }
+        i++;
+    }
+    return 1;
+}
+
 
 int main (int argc, char *argv[])
 {
@@ -41,13 +69,14 @@ int main (int argc, char *argv[])
 			if (instr != NULL) {
 				/* IS */
 				if (instr->op->opcode == IS) {
-					if(check_rotulo(instr->label, &errptr)) {
+					if(chk_rotulo(instr->label, errptr)) {
 						Operand* opd = operand_create_register(instr->opds[0]->value.reg);
 						InsertionResult res = stable_insert(alias_table, instr->label);
 						res.data->opd = opd;
 					} else {
 						printf("line %d: %s\n", line, buffer->data);
 						printf("^\n");
+						print_error_msg(NULL);
 						exit(1);
 					}
 				}
