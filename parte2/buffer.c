@@ -89,10 +89,13 @@ int read_line (FILE *input, Buffer *buffer)
 {
     buffer_reset(buffer);
     char c = getc(input);
-    while (c != '\n' && c != EOF && c != ';') {
+    while (c != '\n' && c != EOF && c != ';' && c != '*') {
         buffer_push_back(buffer, c);
         c = getc(input);
     }
+    if (c == '*') do {
+        c = getc(input);
+    } while (c != '\n');
     buffer_push_back(buffer, '\0');
     return (buffer->i - 1);
 }
