@@ -75,10 +75,6 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr, const cha
         *errptr = rotulo;
         return 0;
     }
-	if(rotulo[0] != 0) {
-		InsertionResult res = stable_insert(alias_table, rotulo);
-		res.data->str = rotulo;
-	}
 	
     (*instr)->label = rotulo;
     operador = malloc(sizeof(char) * 16);
@@ -102,12 +98,17 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr, const cha
  operando:
 	for (; isspace(s[i]); i++);
     if ((*instr)->op->opd_types[0] != OP_NONE) {
-	    j = 0;
+		EntryData *col;
+		j = 0;
         while (!(isspace(s[i])) && s[i] != '\0' && s[i] != ',') {
             opd_read[0][j] = s[i];
             j++; i++;
         }
-        if (((*instr)->op->opd_types[0]&LABEL) == LABEL) {
+		col = stable_find(alias_table, opd_read[0]);
+		if(col) {
+			(*instr)->opds[0] = col->opd;
+		}
+        else if (((*instr)->op->opd_types[0]&LABEL) == LABEL) {
         	(*instr)->opds[0] = operand_create_label(opd_read[0]);
 
         } else if (((*instr)->op->opd_types[0]&REGISTER) == REGISTER) {
@@ -127,13 +128,18 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr, const cha
         }
     }
     if ((*instr)->op->opd_types[1] != OP_NONE) {
+		EntryData *col;
 	    for (; isspace(s[i]) || s[i] == ','; i++);
 	    j = 0;
         while (!(isspace(s[i])) && s[i] != '\0' && s[i] != ',') {
             opd_read[1][j] = s[i];
             j++; i++;
         }
-        if (((*instr)->op->opd_types[1]&LABEL) == LABEL) {
+		col = stable_find(alias_table, opd_read[1]);
+		if(col) {
+			(*instr)->opds[1] = col->opd;
+		}
+        else if (((*instr)->op->opd_types[1]&LABEL) == LABEL) {
         	(*instr)->opds[1] = operand_create_label(opd_read[1]);
 
         } else if (((*instr)->op->opd_types[1]&REGISTER) == REGISTER) {
@@ -153,13 +159,18 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr, const cha
         }
     }
     if ((*instr)->op->opd_types[2] != OP_NONE) {
+		EntryData *col;
 	    for (; isspace(s[i]) || s[i] == ','; i++);
 	    j = 0;
         while (!(isspace(s[i])) && s[i] != '\0' && s[i] != ',') {
             opd_read[2][j] = s[i];
             j++; i++;
         }
-        if (((*instr)->op->opd_types[2]&LABEL) == LABEL) {
+		col = stable_find(alias_table, opd_read[2]);
+		if(col) {
+			(*instr)->opds[2] = col->opd;
+		}
+        else if (((*instr)->op->opd_types[2]&LABEL) == LABEL) {
         	(*instr)->opds[2] = operand_create_label(opd_read[2]);
 
         } else if (((*instr)->op->opd_types[2]&REGISTER) == REGISTER) {
