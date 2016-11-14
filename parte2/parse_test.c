@@ -19,7 +19,6 @@ int check_char (char c)
     return ((c > 64 && c < 91) || (c == 95) || (c > 96 && c < 123) || (c > 47 && c < 58));
 }
 
-
 int chk_rotulo(char *stg, const char *errptr)
 {
     int i = 1, j;
@@ -40,7 +39,6 @@ int chk_rotulo(char *stg, const char *errptr)
     return 1;
 }
 
-
 int main (int argc, char *argv[])
 {
 	int line;
@@ -57,6 +55,15 @@ int main (int argc, char *argv[])
 
 	buffer = buffer_create();
 	alias_table = stable_create();
+
+    /* Default */
+    unsigned char regs[] = {255,  254,  253,   252,   251, 250};
+    char *regLabels[] =    {"rA", "rR", "rSP", "rX", "rY", "rZ"};
+    for (int i = 0; i < 6; i++) {
+        Operand *opd = operand_create_register(regs[i]);
+        InsertionResult res = stable_insert(alias_table, regLabels[i]);
+        res.data->opd = opd;
+    }
 
 	line = 0;
 	while (read_line(in, buffer)) {
@@ -91,7 +98,7 @@ int main (int argc, char *argv[])
 				printf("operands = ");
 				for (int i = 0; i < 3; i++) {
 					if (instr->opds[i]) {
-						if (i != 0) printf(", ");                        
+						if (i != 0) printf(", ");
                         if ((instr->opds[i]->type & LABEL) == LABEL)
                             printf("Label(\"%s\")", instr->opds[i]->value.label);
                         else if ((instr->opds[i]->type & STRING) == STRING)
