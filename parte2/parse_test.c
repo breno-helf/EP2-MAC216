@@ -92,20 +92,14 @@ int main (int argc, char *argv[])
 				for (int i = 0; i < 3; i++) {
 					if (instr->opds[i]) {
 						if (i != 0) printf(", ");
-						switch (instr->opds[i]->type) {
-							case NUMBER_TYPE:
-								printf("Number(%lld)", instr->opds[i]->value.num);
-								break;
-							case LABEL:
-								printf("Label(\"%s\")", instr->opds[i]->value.label);
-								break;
-							case STRING:
-								printf("String(\"%s\")", instr->opds[i]->value.str);
-								break;
-							case REGISTER:
-								printf("Register(%u)", instr->opds[i]->value.reg);
-								break;
-						}
+                        if ((instr->opds[i]->type & NUMBER_TYPE) == NUMBER_TYPE)
+                            printf("Number(%lld)", instr->opds[i]->value.num);
+                        else if ((instr->opds[i]->type & LABEL) == LABEL)
+                            printf("Label(\"%s\")", instr->opds[i]->value.label);
+                        else if ((instr->opds[i]->type & STRING) == STRING)
+                            printf("String(\"%s\")", instr->opds[i]->value.str);
+                        else if ((instr->opds[i]->type & REGISTER) == REGISTER)
+                            printf("Register(%u)", instr->opds[i]->value.reg);
 					}
 				}
 				printf("\n\n");
