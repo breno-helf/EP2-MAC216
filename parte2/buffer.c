@@ -97,5 +97,10 @@ int read_line (FILE *input, Buffer *buffer)
         c = getc(input);
     } while (c != '\n');
     buffer_push_back(buffer, '\0');
+    if (buffer->i == 1) {
+        if (c == EOF)
+            return -1;
+        return 0;
+    }
     return (buffer->i - 1);
 }
