@@ -103,16 +103,16 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr, const cha
             opd_read[0][j] = s[i];
             j++; i++;
         }
-        if ((*instr)->op->opd_types[0] == LABEL) {
+        if (((*instr)->op->opd_types[0]&LABEL) == LABEL) {
         	(*instr)->opds[0] = operand_create_label(opd_read[0]);
 
-        } else if ((*instr)->op->opd_types[0] == REGISTER) {
+        } else if (((*instr)->op->opd_types[0]&REGISTER) == REGISTER) {
             (*instr)->opds[0] = operand_create_register(atoi(opd_read[0]));
 
-        } else if ((*instr)->op->opd_types[0] == STRING) {
+        } else if (((*instr)->op->opd_types[0]&STRING) == STRING) {
         	(*instr)->opds[0] = operand_create_string(opd_read[0]);
 
-        } else if ((*instr)->op->opd_types[0] == NUMBER_TYPE) {
+        } else {
         	(*instr)->opds[0] = operand_create_number(atoi(opd_read[0]));
 
         }
@@ -159,11 +159,13 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr, const cha
 
         }
     }
+	/*
     for (; s[i] != '\0' || s[i] != '*'; i++)
         if (s[i] != ' ' || s[i] != '\n') {
             set_error_msg("Erro de sintaxe");
             *errptr = &(s[i]);
             return 0;
         }
+	*/
     return 1;
 }

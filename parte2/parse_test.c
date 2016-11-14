@@ -70,7 +70,7 @@ int main (int argc, char *argv[])
 				/* IS */
 				if (instr->op->opcode == IS) {
 					if(chk_rotulo(instr->label, errptr)) {
-						Operand* opd = operand_create_register(instr->opds[0]->value.reg);
+						Operand *opd = operand_create_register(instr->opds[0]->value.reg);
 						InsertionResult res = stable_insert(alias_table, instr->label);
 						res.data->opd = opd;
 					} else {
