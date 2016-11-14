@@ -41,7 +41,7 @@ int chk_rotulo(char *stg, const char *errptr)
 
 int main (int argc, char *argv[])
 {
-	int line;
+	int line, aux;
 	FILE *in;
 	Buffer *buffer;
 	SymbolTable alias_table;
@@ -66,7 +66,9 @@ int main (int argc, char *argv[])
     }
 
 	line = 0;
-	while (read_line(in, buffer)) {
+	aux = read_line(in, buffer);
+	while (aux != -1) {
+	if (aux > 0) {
 		const char *errptr;
 		Instruction *instr;
 		line++;
@@ -117,6 +119,8 @@ int main (int argc, char *argv[])
 			print_error_msg(NULL);
 			exit(1);
 		}
+    }
+    aux = read_line(in, buffer);
 	}
 
 	buffer_destroy(buffer);
