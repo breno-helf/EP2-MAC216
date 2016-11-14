@@ -1,3 +1,6 @@
 a IS $0
-  MUL $0, $0, 2
-  INT #80
+oi   MUL	 $0, $0, 2
+	 ADD  $1, $0, $1
+	 PUSH $1
+     INT #80
+

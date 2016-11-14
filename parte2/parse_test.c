@@ -91,15 +91,15 @@ int main (int argc, char *argv[])
 				printf("operands = ");
 				for (int i = 0; i < 3; i++) {
 					if (instr->opds[i]) {
-						if (i != 0) printf(", ");
-                        if ((instr->opds[i]->type & NUMBER_TYPE) == NUMBER_TYPE)
-                            printf("Number(%lld)", instr->opds[i]->value.num);
-                        else if ((instr->opds[i]->type & LABEL) == LABEL)
+						if (i != 0) printf(", ");                        
+                        if ((instr->opds[i]->type & LABEL) == LABEL)
                             printf("Label(\"%s\")", instr->opds[i]->value.label);
                         else if ((instr->opds[i]->type & STRING) == STRING)
                             printf("String(\"%s\")", instr->opds[i]->value.str);
                         else if ((instr->opds[i]->type & REGISTER) == REGISTER)
                             printf("Register(%u)", instr->opds[i]->value.reg);
+						else
+                            printf("Number(%lld)", instr->opds[i]->value.num);
 					}
 				}
 				printf("\n\n");

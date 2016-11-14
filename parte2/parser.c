@@ -47,8 +47,8 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr, const cha
 		opd_read[i] = malloc(sizeof(char) * 16);
 
     rotulo = malloc(sizeof(char) * 16);
-    for (i = 0; s[i] == ' '; i++);
-    while (s[i] != ' ' && s[i] != '\0' && j < 16) {
+    for (i = 0; isspace(s[i]); i++);
+    while (!(isspace(s[i])) && s[i] != '\0' && j < 16) {
         rotulo[j] = s[i];
         j++; i++;
     }
@@ -78,9 +78,9 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr, const cha
 
     (*instr)->label = rotulo;
     operador = malloc(sizeof(char) * 16);
-    for (; s[i] == ' '; i++);
+    for (; isspace(s[i]); i++);
     j = 0;
-    while (s[i] != ' ' && s[i] != '\0') {
+    while (!(isspace(s[i])) && s[i] != '\0') {
         operador[j] = s[i];
         j++; i++;
     }
@@ -96,10 +96,10 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr, const cha
 	}
 
  operando:
-	for (; s[i] == ' '; i++);
+	for (; isspace(s[i]); i++);
     if ((*instr)->op->opd_types[0] != OP_NONE) {
 	    j = 0;
-        while (s[i] != ' ' && s[i] != '\0' && s[i] != ',') {
+        while (!(isspace(s[i])) && s[i] != '\0' && s[i] != ',') {
             opd_read[0][j] = s[i];
             j++; i++;
         }
@@ -118,9 +118,9 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr, const cha
         }
     }
     if ((*instr)->op->opd_types[1] != OP_NONE) {
-	    for (; s[i] == ' ' || s[i] == ','; i++);
+	    for (; isspace(s[i]) || s[i] == ','; i++);
 	    j = 0;
-        while (s[i] != ' ' && s[i] != '\0' && s[i] != ',') {
+        while (!(isspace(s[i])) && s[i] != '\0' && s[i] != ',') {
             opd_read[1][j] = s[i];
             j++; i++;
         }
@@ -139,9 +139,9 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr, const cha
         }
     }
     if ((*instr)->op->opd_types[2] != OP_NONE) {
-	    for (; s[i] == ' ' || s[i] == ','; i++);
+	    for (; isspace(s[i]) || s[i] == ','; i++);
 	    j = 0;
-        while (s[i] != ' ' && s[i] != '\0' && s[i] != ',') {
+        while (!(isspace(s[i])) && s[i] != '\0' && s[i] != ',') {
             opd_read[2][j] = s[i];
             j++; i++;
         }
@@ -161,7 +161,7 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr, const cha
     }
 	/*
     for (; s[i] != '\0' || s[i] != '*'; i++)
-        if (s[i] != ' ' || s[i] != '\n') {
+        if (!(isspace(s[i])) || s[i] != '\n') {
             set_error_msg("Erro de sintaxe");
             *errptr = &(s[i]);
             return 0;
