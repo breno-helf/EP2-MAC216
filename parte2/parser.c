@@ -96,67 +96,65 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr, const cha
 	}
 
  operando:
-    for (a = 0; a < 3; a++)
-        (*instr)->opds[a]->type = (*instr)->op->opd_types[a];
 	for (; s[i] == ' '; i++);
-    if ((*instr)->opds[0]->type != OP_NONE) {
+    if ((*instr)->op->opd_types[0] != OP_NONE) {
 	    j = 0;
         while (s[i] != ' ' && s[i] != '\0' && s[i] != ',') {
             opd_read[0][j] = s[i];
             j++; i++;
         }
-        if ((*instr)->opds[0]->type == LABEL) {
+        if ((*instr)->op->opd_types[0] == LABEL) {
         	(*instr)->opds[0] = operand_create_label(opd_read[0]);
 
-        } else if ((*instr)->opds[0]->type == REGISTER) {
+        } else if ((*instr)->op->opd_types[0] == REGISTER) {
             (*instr)->opds[0] = operand_create_register(atoi(opd_read[0]));
 
-        } else if ((*instr)->opds[0]->type == STRING) {
+        } else if ((*instr)->op->opd_types[0] == STRING) {
         	(*instr)->opds[0] = operand_create_string(opd_read[0]);
 
-        } else if ((*instr)->opds[0]->type == NUMBER_TYPE) {
+        } else if ((*instr)->op->opd_types[0] == NUMBER_TYPE) {
         	(*instr)->opds[0] = operand_create_number(atoi(opd_read[0]));
 
         }
     }
-    if ((*instr)->opds[1]->type != OP_NONE) {
+    if ((*instr)->op->opd_types[1] != OP_NONE) {
 	    for (; s[i] == ' ' || s[i] == ','; i++);
 	    j = 0;
         while (s[i] != ' ' && s[i] != '\0' && s[i] != ',') {
             opd_read[1][j] = s[i];
             j++; i++;
         }
-        if ((*instr)->opds[1]->type == LABEL) {
+        if ((*instr)->op->opd_types[1] == LABEL) {
         	(*instr)->opds[1] = operand_create_label(opd_read[1]);
 
-        } else if ((*instr)->opds[1]->type == REGISTER) {
+        } else if ((*instr)->op->opd_types[1] == REGISTER) {
             (*instr)->opds[1] = operand_create_register(atoi(opd_read[1]));
 
-        } else if ((*instr)->opds[1]->type == STRING) {
+        } else if ((*instr)->op->opd_types[1] == STRING) {
         	(*instr)->opds[1] = operand_create_string(opd_read[1]);
 
-        } else if ((*instr)->opds[1]->type == NUMBER_TYPE) {
+        } else if ((*instr)->op->opd_types[1] == NUMBER_TYPE) {
         	(*instr)->opds[1] = operand_create_number(atoi(opd_read[1]));
 
         }
     }
-    if ((*instr)->opds[2]->type != OP_NONE) {
+    if ((*instr)->op->opd_types[2] != OP_NONE) {
 	    for (; s[i] == ' ' || s[i] == ','; i++);
 	    j = 0;
         while (s[i] != ' ' && s[i] != '\0' && s[i] != ',') {
             opd_read[2][j] = s[i];
             j++; i++;
         }
-        if ((*instr)->opds[2]->type == LABEL) {
+        if ((*instr)->op->opd_types[2] == LABEL) {
         	(*instr)->opds[2] = operand_create_label(opd_read[2]);
 
-        } else if ((*instr)->opds[2]->type == REGISTER) {
+        } else if ((*instr)->op->opd_types[2] == REGISTER) {
             (*instr)->opds[2] = operand_create_register(atoi(opd_read[2]));
 
-        } else if ((*instr)->opds[2]->type == STRING) {
+        } else if ((*instr)->op->opd_types[2] == STRING) {
         	(*instr)->opds[2] = operand_create_string(opd_read[2]);
 
-        } else if ((*instr)->opds[2]->type == NUMBER_TYPE) {
+        } else if ((*instr)->op->opd_types[2] == NUMBER_TYPE) {
         	(*instr)->opds[2] = operand_create_number(atoi(opd_read[2]));
 
         }
