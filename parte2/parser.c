@@ -75,7 +75,11 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr, const cha
         *errptr = rotulo;
         return 0;
     }
-
+	if(rotulo[0] != 0) {
+		InsertionResult res = stable_insert(alias_table, rotulo);
+		res.data->str = rotulo;
+	}
+	
     (*instr)->label = rotulo;
     operador = malloc(sizeof(char) * 16);
     for (; isspace(s[i]); i++);

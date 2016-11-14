@@ -2,5 +2,6 @@ a IS $0
 oi   MUL	 $0, $0, 2
 	 ADD  $1, $0, $1
 	 PUSH $1
+	 JMP  oi
      INT #80
 
