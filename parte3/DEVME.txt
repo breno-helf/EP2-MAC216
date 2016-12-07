@@ -1,4 +1,4 @@
-	Este arquivo especifica o que ainda deve ser feito na Parte III do EP2 de
+    Este arquivo especifica o que ainda deve ser feito na Parte III do EP2 de
 MAC0216. Sinta-se a vontade para excluir ou adicionar pontos e lembre-se de
 apagar este arquivo antes de enviar o EP.
 
