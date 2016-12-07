@@ -1,0 +1,25 @@
+	Este arquivo especifica o que ainda deve ser feito na Parte III do EP2 de
+MAC0216. Sinta-se a vontade para excluir ou adicionar pontos e lembre-se de
+apagar este arquivo antes de enviar o EP.
+
+    Antes de mais nada gostaria de dizer que os arquivos responsáveis pelo
+parse ainda não foram inseridos devido ao fato de que os feitos por nós
+ainda tem algumas deficiências (Como falta de exibição de erros e a lista
+ligada ainda não ter sido feita). Quanto a isso acho que pode olhar o que
+outros grupos fizeram e completar o nosso desse modo.
+
+Coisas a serem feitas:
+	   Pré-EP:
+    - Incluir arquivos responsáveis de parsing (parser.c e parser.h)
+	
+	   Montador (O que vai gerar o código objeto):
+	- Escrever a função assemble (de asm.h e asm.c)
+	- Escrever o macas.c (Que simplesmente vai ler o arquivo e mandar pro asm)
+	- Verificar os 5 erros pedidos no site pelo Fmario.
+	DICA: Seguir a recomendação postada no site.
+
+	   Vinculador (Montar código objeto em código de máquina):
+	- Verificar se os rótulos não resolvidos de cada arquvio foram exportados
+	  para algum outro arquivo (E calcular os JMP).
+	- Verificar se o Rótulo MAIN foi Exportado por algum arquivo.
+	- Capturar os 3 tipos de erros escritos no PACA.
