@@ -1,6 +1,6 @@
 /*
     Breno Helfstein Moura       NUSP: 9790972
-    Lucas Daher                 NUSP: ?
+    Lucas Daher                 NUSP: 8991769
     Raphael dos Reis Gusmao     NUSP: 9778561
 */
 #include<stdio.h>
@@ -41,7 +41,21 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 	  Lembre-se de sempre atualizar as tabelas de simbolo
 	  acima quando necessário.
 	*/
-
+    
+    Instruction instr, curr;
+    int lns_objcode
+    
+    /*
+    separa in em linhas, chama o parser, salva em curr
+	if (curr == pseudoOP)
+	    atualiza tabelas;
+	else {
+	    instr->next = curr
+	    intr = curr
+	    lns_objcode += n
+	} 
+	*/
+	
 	/*
 	  Após isso percorra a lista gerando o código objeto de cada
 	  instrução, definido por nós mesmos :P
