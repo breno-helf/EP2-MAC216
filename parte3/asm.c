@@ -86,7 +86,10 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 					/* IS */
 					if (instr->op->opcode == IS) {
 						/*Diferenciar mensagens de erro para cada erro */
-						if(stable_find(alias_table, instr->label) == NULL && chk_rotulo(instr->label, errptr)) {
+						EntryData *label_ptr, *alias_ptr;
+						label_ptr = stable_find(label_table, instr->label);
+						alias_ptr = stable_find(alias_table, instr->label);
+						if(label_ptr == NULL && alias_ptr == NULL && chk_rotulo(instr->label, errptr)) {
 							Operand *opd = operand_create_register(instr->opds[0]->value.reg);
 							InsertionResult res = stable_insert(alias_table, instr->label);
 							res.data->opd = opd;
@@ -100,7 +103,11 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 					/* Label */
 					if (instr->label != NULL) {
 						InsertionResult res;
-						if(stable_find(label_table, instr->label) != NULL) {							
+						EntryData *label_ptr, *alias_ptr;
+						label_ptr = stable_find(label_table, instr->label);
+						alias_ptr = stable_find(alias_table, instr->label);
+
+						if(label_ptr != NULL && alias_ptr != NULL) {							
 							printf("%s\nlabel %s already defined", buffer->data, instr->label);
 							exit(-1);
 						}
