@@ -74,7 +74,7 @@ int main (int argc, char *argv[])
 		line++;
 		if (parse(buffer->data, alias_table, &instr, &errptr)) {
 			/* Line */
-			printf("line = %s\n", buffer->data);
+			printf("line     = %s\n", buffer->data);
 			if (instr != NULL) {
 				/* IS */
 				if (instr->op->opcode == IS) {
@@ -83,7 +83,7 @@ int main (int argc, char *argv[])
 						InsertionResult res = stable_insert(alias_table, instr->label);
 						res.data->opd = opd;
 					} else {
-						printf("line %d: %s\n", line, buffer->data);
+						printf("line     %d: %s\n", line, buffer->data);
 						printf("^\n");
 						print_error_msg(NULL);
 						exit(1);
@@ -91,9 +91,9 @@ int main (int argc, char *argv[])
 				}
 				/* Label */
 				if (instr->label != NULL)
-					printf("label = \"%s\"\n", instr->label);
+					printf("label    = \"%s\"\n", instr->label);
 				else
-					printf("label = n/a\n");
+					printf("label    = n/a\n");
 				/* Operator */
 				printf("operator = %s\n", instr->op->name);
 				/* Operands */
