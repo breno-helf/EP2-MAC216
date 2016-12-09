@@ -12,6 +12,32 @@
 #include "asmtypes.h"
 #include "optable.h"
 #include "opcodes.h"
+#include "parser.h"
+
+int check_char (char c)
+{
+    return ((c > 64 && c < 91) || (c == 95) || (c > 96 && c < 123) || (c > 47 && c < 58));
+}
+
+int chk_rotulo(char *stg, const char *errptr)
+{
+    int i = 1, j;
+    if (!(isalpha(stg[0]) || stg[0] == 95)) {
+        errptr = &stg[0];
+		set_error_msg("primeiro char nao eh letra ou underscore");
+		return 0;
+    }
+    while (stg[i] != '\0') {
+        j = check_char(stg[i]);
+        if (!j) {
+			errptr = &stg[i];
+			set_error_msg("Encontrado char que nao eh numero, letra ou underscore");
+			return 0;
+        }
+        i++;
+    }
+    return 1;
+}
 
 /*
   Implementar a função
@@ -57,9 +83,10 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 				/* Line */
 				/* printf("line = %s\n", buffer->data); */
 				if (instr != NULL) {
-					/* IS - Verificar se o alias já não foi definido*/
+					/* IS */
 					if (instr->op->opcode == IS) {
-						if(chk_rotulo(instr->label, errptr)) {
+						/*Diferenciar mensagens de erro para cada erro */
+						if(stable_find(alias_table, instr->label) == NULL && chk_rotulo(instr->label, errptr)) {
 							Operand *opd = operand_create_register(instr->opds[0]->value.reg);
 							InsertionResult res = stable_insert(alias_table, instr->label);
 							res.data->opd = opd;
@@ -67,12 +94,16 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 							printf("line %d: %s\n", line, buffer->data);
 							printf("^\n");
 							print_error_msg(NULL);
-							exit(1);
+							exit(-1);
 						}
 					}
-					/* Label - Verificar se Rotulo ja nao foi definido*/
+					/* Label */
 					if (instr->label != NULL) {
 						InsertionResult res;
+						if(stable_find(label_table, instr->label) != NULL) {							
+							printf("%s\nlabel %s already defined", buffer->data, instr->label);
+							exit(-1);
+						}
 						res = stable_insert(label_table, instr->label);
 						res.data->str = instr->label;
 					}
