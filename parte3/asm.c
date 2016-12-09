@@ -77,7 +77,10 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 		if (aux > 0) {
 			const char *errptr;
 			Instruction *instr;
-			/* Não sei se é assim que conta linhas, verificar */
+			/* Não sei se é assim que conta linhas, verificar
+			[COMENTARIO DO LUCAS]
+			Não é, porque tem instrução que soma mais de uma linha,
+			tem instrução que não soma nada*/
 			line++;
 			if (parse(buffer->data, alias_table, &instr, &errptr)) {
 				/* Line */
@@ -100,7 +103,11 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 							exit(-1);
 						}
 					}
-					/* Label */
+					/* Label
+					[COMENTÁRIO DO LUCAS]
+					acho que tem que ser else if, porque se
+					não os casos de IS entram aqui também,
+					talvez tenham que entrar e eu não sei*/
 					if (instr->label != NULL) {
 						InsertionResult res;
 						EntryData *label_ptr, *alias_ptr;
@@ -119,7 +126,10 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 			} 
 			
 		}
-		/* Fazendo a lista ligada */		
+		/* Fazendo a lista ligada
+		[COMENTÁRIO DO LUCAS]
+		Nem todas as instruções entram na lista ligada
+		algumas são pseudocódigo, tipo IS */		
 		if(f == 0) {
 			start = cur = instr;
 			f = 1;
