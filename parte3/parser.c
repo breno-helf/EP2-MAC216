@@ -35,6 +35,37 @@ int check_rotulo (char *stg, const char *errptr)
     return 1;
 }
 
+char* HexToDec(char *s) {
+	char *ret;
+	int num = 0, tam = 0, i, pow = 1, aux;
+	ret = malloc(15);
+	while(s[tam] != 0) tam++;
+	
+	for(i = tam - 1; i > 0; i--) {
+		
+		if(isdigit(s[i]))
+			num += pow*(s[i] - '0');
+		else if(islower(s[i]))
+			num += pow*(s[i] - 'a' + 10);
+		else
+			num += pow*(s[i] - 'A' + 10);
+		pow *= 16;
+	}
+	tam = 0;
+	aux = num;
+	while(aux) {
+		aux /= 10;
+		tam++;
+	}
+
+	for(i = tam - 1; i >= 0; i--) {
+		ret[i] = '0' + (num%10);
+		num /= 10;
+	}
+	return ret;
+}
+
+
 int parse(const char *s, SymbolTable alias_table, Instruction **instr, const char **errptr) {
     char *rotulo, *operador, *operand, **opd_read;
     const Operator *op;
@@ -111,7 +142,7 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr, const cha
         else if (((*instr)->op->opd_types[0]&LABEL) == LABEL) {
         	(*instr)->opds[0] = operand_create_label(opd_read[0]);
 
-        } else if (((*instr)->op->opd_types[0]&REGISTER) == REGISTER) {
+        } else if (!(isdigit(opd_read[0][0]) || opd_read[0][0] == '#') && ((*instr)->op->opd_types[0]&REGISTER) == REGISTER) {
 			int k = 0;
 			while(!(isdigit(opd_read[0][k]))) k++;
             (*instr)->opds[0] = operand_create_register(atoi(&opd_read[0][k]));
@@ -120,10 +151,10 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr, const cha
         	(*instr)->opds[0] = operand_create_string(opd_read[0]);
 
         } else {
-			int k = 0;
-			while(!(isdigit(opd_read[0][k]))) k++;
-
-        	(*instr)->opds[0] = operand_create_number(atoi(&opd_read[0][k]));
+			if(opd_read[0][0] == '#')
+				opd_read[0] = HexToDec(opd_read[0]);
+			
+        	(*instr)->opds[0] = operand_create_number(atoi(&opd_read[0][0]));
 
         }
     }
@@ -142,7 +173,7 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr, const cha
         else if (((*instr)->op->opd_types[1]&LABEL) == LABEL) {
         	(*instr)->opds[1] = operand_create_label(opd_read[1]);
 
-        } else if (((*instr)->op->opd_types[1]&REGISTER) == REGISTER) {
+        } else if (!(isdigit(opd_read[1][0]) || opd_read[1][0] == '#') && ((*instr)->op->opd_types[1]&REGISTER) == REGISTER) {
 			int k = 0;
 			while(!(isdigit(opd_read[1][k]))) k++;
             (*instr)->opds[1] = operand_create_register(atoi(&opd_read[1][k]));
@@ -151,10 +182,10 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr, const cha
         	(*instr)->opds[1] = operand_create_string(opd_read[1]);
 
         } else {
-			int k = 0;
-			while(!(isdigit(opd_read[1][k]))) k++;
+			if(opd_read[1][0] == '#')
+				opd_read[1] = HexToDec(opd_read[1]);
 
-        	(*instr)->opds[1] = operand_create_number(atoi(&opd_read[1][k]));
+        	(*instr)->opds[1] = operand_create_number(atoi(&opd_read[1][0]));
 
         }
     }
@@ -173,7 +204,7 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr, const cha
         else if (((*instr)->op->opd_types[2]&LABEL) == LABEL) {
         	(*instr)->opds[2] = operand_create_label(opd_read[2]);
 
-        } else if (((*instr)->op->opd_types[2]&REGISTER) == REGISTER) {
+        } else if (!(isdigit(opd_read[2][0]) || opd_read[2][0] == '#') && ((*instr)->op->opd_types[2]&REGISTER) == REGISTER) {
 			int k = 0;
 			while(!(isdigit(opd_read[2][k]))) k++;
             (*instr)->opds[2] = operand_create_register(atoi(&opd_read[2][k]));
@@ -182,10 +213,10 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr, const cha
         	(*instr)->opds[2] = operand_create_string(opd_read[2]);
 
         } else {
-			int k = 0;
-			while(!(isdigit(opd_read[2][k]))) k++;
+			if(opd_read[2][0] == '#')
+				opd_read[2] = HexToDec(opd_read[2]);
 
-        	(*instr)->opds[2] = operand_create_number(atoi(&opd_read[2][k]));
+        	(*instr)->opds[2] = operand_create_number(atoi(&opd_read[2][0]));
 
         }
     }
