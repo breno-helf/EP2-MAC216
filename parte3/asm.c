@@ -42,21 +42,22 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 	  acima quando necessário.
 	*/
     
-    Instruction *start, *curr;
-    int line, aux;
+    Instruction *start, *cur;
+    int line, aux, f = 0;
 	
 	line = 0;
-	aux = read_line(in, buffer);
+	aux = read_line(input, buffer);
 	while (aux != -1) {
 		if (aux > 0) {
 			const char *errptr;
 			Instruction *instr;
+			/* Não sei se é assim que conta linhas, verificar */
 			line++;
 			if (parse(buffer->data, alias_table, &instr, &errptr)) {
 				/* Line */
 				/* printf("line = %s\n", buffer->data); */
 				if (instr != NULL) {
-					/* IS */
+					/* IS - Verificar se o alias já não foi definido*/
 					if (instr->op->opcode == IS) {
 						if(chk_rotulo(instr->label, errptr)) {
 							Operand *opd = operand_create_register(instr->opds[0]->value.reg);
@@ -69,57 +70,32 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 							exit(1);
 						}
 					}
-					/* Label */
-					/* if (instr->label != NULL) */
-
-					/* 	else */
-						
-						/* Operator */
-
-						/* Operands */
-					/*						
-					for (int i = 0; i < 3; i++) {
-						if (instr->opds[i]) {
-							if (i != 0) printf(", ");
-							if ((instr->opds[i]->type & LABEL) == LABEL)
-								printf("Label(\"%s\")", instr->opds[i]->value.label);
-							else if ((instr->opds[i]->type & STRING) == STRING)
-								printf("String(\"%s\")", instr->opds[i]->value.str);
-							else if ((instr->opds[i]->type & REGISTER) == REGISTER)
-								printf("Register(%u)", instr->opds[i]->value.reg);
-							else
-								printf("Number(%lld)", instr->opds[i]->value.num);
-						}
-					}					
-					printf("\n\n");
+					/* Label - Verificar se Rotulo ja nao foi definido*/
+					if (instr->label != NULL) {
+						InsertionResult res;
+						res = stable_insert(label_table, instr->label);
+						res.data->str = instr->label;
+					}
 					
-				} else printf("label = n/a\noperator = n/a\noperands = n/a\n\n");
-					*/	
-			} else {
-				printf("line %d: %s\n", line, buffer->data);
-				printf("^\n");
-				print_error_msg(NULL);
-				exit(1);
-			}
-				  
+				}
+			} 
+			
 		}
-		aux = read_line(in, buffer);
+		/* Fazendo a lista ligada */		
+		if(f == 0) {
+			start = cur = instr;
+			f = 1;
+		}
+		else {
+			cur->next = insrt;
+			cur = instr;
+		}
+		aux = read_line(input, buffer);
 	}
 
 	buffer_destroy(buffer);
 
-	
-    /*
-    separa in em linhas, chama o parser, salva em curr
-	if (curr == pseudoOP)
-	    atualiza tabelas;
-	else {
-	    instr->next = curr
-	    intr = curr
-	    lns_objcode += n
-	} 
-	*/
-	
+		
 	/*
 	  Após isso percorra a lista gerando o código objeto de cada
 	  instrução, definido por nós mesmos :P
