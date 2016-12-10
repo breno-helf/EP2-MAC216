@@ -13,6 +13,7 @@
 #include "optable.h"
 #include "opcodes.h"
 #include "parser.h"
+#include "opcodes.h"
 
 int check_char (char c)
 {
@@ -37,6 +38,13 @@ int chk_rotulo(char *stg, const char *errptr)
         i++;
     }
     return 1;
+}
+
+int isCode(Instruction *instr) {
+	if(instr->op->opcode < 0)
+		return 0;
+	else
+		return 1;
 }
 
 /*
@@ -80,7 +88,11 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 			/* Não sei se é assim que conta linhas, verificar
 			[COMENTARIO DO LUCAS]
 			Não é, porque tem instrução que soma mais de uma linha,
-			tem instrução que não soma nada*/
+			tem instrução que não soma nada
+			[COMENTARIO DO BRENO]
+			Então faz ae, por que eu não manjo qual que conta qual
+			que não
+			*/
 			line++;
 			if (parse(buffer->data, alias_table, &instr, &errptr)) {
 				/* Line */
@@ -104,16 +116,19 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 						}
 					}
 					/* Label
-					[COMENTÁRIO DO LUCAS]
+					[COMENTÁRIO DO LUCAS] DONE
 					acho que tem que ser else if, porque se
 					não os casos de IS entram aqui também,
 					talvez tenham que entrar e eu não sei*/
-					if (instr->label != NULL) {
+					else if (instr->label != NULL) {
 						InsertionResult res;
 						EntryData *label_ptr, *alias_ptr;
 						label_ptr = stable_find(label_table, instr->label);
 						alias_ptr = stable_find(alias_table, instr->label);
-
+						if(instr->op->opcode == EXTERN) {
+							printf("%s\nlabel %s should not be defined for EXTERN\n", buffer->data, instr->label);
+						}
+						
 						if(label_ptr != NULL && alias_ptr != NULL) {							
 							printf("%s\nlabel %s already defined", buffer->data, instr->label);
 							exit(-1);
@@ -127,14 +142,14 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 			
 		}
 		/* Fazendo a lista ligada
-		[COMENTÁRIO DO LUCAS]
+		[COMENTÁRIO DO LUCAS] DONE
 		Nem todas as instruções entram na lista ligada
 		algumas são pseudocódigo, tipo IS */		
 		if(f == 0) {
 			start = cur = instr;
 			f = 1;
 		}
-		else {
+		else if(isCode(instr)) {
 			cur->next = insrt;
 			cur = instr;
 		}
