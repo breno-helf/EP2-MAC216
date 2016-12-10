@@ -41,10 +41,109 @@ int chk_rotulo(char *stg, const char *errptr)
 }
 
 int isCode(Instruction *instr) {
-	if(instr->op->opcode < 0)
+	if(instr->op->opcode != EXTERN && instr->op->opcode != IS)
 		return 0;
 	else
 		return 1;
+}
+
+int isPseudoCode(Instruction *instr) {
+	int var;
+	var = instr->op->opcode;
+	return (var == CALL || var == PUSH || var == RET);
+}
+
+Instruction* PseudoToCode(Instruction *instr) {
+	Instruction *ret, *aux;
+	int var;
+	var = instr->op->opcode;
+	if(var == CALL) {
+		Operator *op;
+		Operand *opds[3];
+		
+		op = optable_find("GETA");
+		opds[0] = operand_create_register(250);
+		opds[1] = operand_create_number(4);
+		opds[2] = NULL;
+		ret = instr_create(instr->label, op, opds);
+		aux = ret;
+		
+		op = optable_find("STO");
+		opds[0] = instr->opds[0];
+		opds[1] = operand_create_register(253);
+		opds[2] = operand_create_number(0);
+		aux->next = instr_create(NULL, op, opds);
+		aux = aux->next;
+
+		op = optable_find("ADD");
+		opds[0] = operand_create_register(253);
+		opds[1] = operand_create_register(253);
+		opds[2] = operand_create_number(8);				
+		aux->next = instr_create(NULL, op, opds);
+		aux = aux->next;
+
+		op = optable_find("JMP");
+		opds[0] = instr->op->opds[0];
+		opds[1] = NULL;
+		opds[2] = NULL;						
+		aux->next = instr_create(NULL, op, opds);
+		aux = aux->next;
+		aux->next = NULL;
+		return ret;
+	}
+	else if(var == PUSH) {
+		Operator *op;
+		Operand *opds[3];
+
+		op = optable_find("STO");
+		opds[0] = instr->opds[0];
+		opds[1] = operand_create_register(253);
+		opds[2] = operand_create_number(0);
+		ret = instr_create(instr->label, op, opds);
+		
+		op = optable_find("ADD");
+		opds[0] = operand_create_register(253);
+		opds[1] = operand_create_register(253);
+		opds[2] = operand_create_number(8);
+		aux = ret;
+		aux->next = instr_create(NULL, op, opds);
+		aux = aux->next;
+		aux->next = NULL;
+		return ret;
+	}
+	else if(var == RET) {
+		Operator *op;
+		Operand *opds[3];
+		
+		op = optable_find("SUB");
+		opds[0] = operand_create_register(253);
+		opds[1] = operand_create_register(253);
+		opds[2] = operand_create_number(8*(instr->opds[0]->OperandValue.num + 1))
+		ret = instr_create(instr->label, op, opds);
+		aux = ret;
+		
+		op = optable_find("LDO");
+		opds[0] = operand_create_register(250);
+		opds[1] = operand_create_register(253);
+		opds[2] = operand_create_number(8*(instr->opds[0]->OperandValue.num));
+		aux->next = instr_create(NULL, op, opds);
+		aux = aux->next;
+
+		op = optable_find("GO");
+		opds[0] = operand_create_register(250);
+		opds[1] = operand_create_number(0);
+		opds[2] = NULL;				
+		aux->next = instr_create(NULL, op, opds);
+		aux = aux->next;
+		aux->next = NULL;
+		return ret;
+	}
+	else {
+		die("Você usou a função de converter código em pseudocódigo em algo que não é pseudocódigo");
+		return instr;
+	}
+	
+	
 }
 
 /*
@@ -54,7 +153,7 @@ int isCode(Instruction *instr) {
 int assemble(const char *filename, FILE *input, FILE *output) {
 	/* A alias type guarda um operand do tipo REG
 	   A label guarda a linha em que a string está
-	   A extern ainda a ser definido
+	   A extern guarda apenas se aquele label EXTERN existe
 	*/
 	SymbolTable alias_table, label_table, extern_table;
     unsigned char regs[] = {255,  254,  253,   252,   251, 250};
@@ -74,33 +173,25 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 	*/
     
     Instruction *start, *cur;
-    int line, aux, f = 0;
+    int line, aux, f = 0, pos = 0;
 	
 	line = 0;
 	aux = read_line(input, buffer);
 	while (aux != -1) {
 		if (aux > 0) {
 			const char *errptr;
-			Instruction *instr;
-			/* Não sei se é assim que conta linhas, verificar
-			[COMENTARIO DO LUCAS]
-			Não é, porque tem instrução que soma mais de uma linha,
-			tem instrução que não soma nada
-			[COMENTARIO DO BRENO]
-			Então faz ae, por que eu não manjo qual que conta qual
-			que não
-			*/
-			line++;
-			if (parse(buffer->data, alias_table, &instr, &errptr)) {
-				/* Line */
-				/* printf("line = %s\n", buffer->data); */
+			Instruction *instr;		 
+			if (parse(buffer->data, alias_table, &instr, &errptr)) {				
+				line++;
 				if (instr != NULL) {
+					instr->next = NULL;
 					/* IS */
 					if (instr->op->opcode == IS) {
 						/*Diferenciar mensagens de erro para cada erro */
-						EntryData *label_ptr, *alias_ptr;
+						EntryData *label_ptr, *alias_ptr, *extern_ptr;
 						label_ptr = stable_find(label_table, instr->label);
 						alias_ptr = stable_find(alias_table, instr->label);
+						extern_ptr = stable_find(extern_table, instr->label);
 						if(label_ptr == NULL && alias_ptr == NULL && chk_rotulo(instr->label, errptr)) {
 							Operand *opd = operand_create_register(instr->opds[0]->value.reg);
 							InsertionResult res = stable_insert(alias_table, instr->label);
@@ -112,11 +203,9 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 							exit(-1);
 						}
 					}
-					/* Label
-					[COMENTÁRIO DO LUCAS] DONE
-					acho que tem que ser else if, porque se
-					não os casos de IS entram aqui também,
-					talvez tenham que entrar e eu não sei*/
+					/* 
+					   Label
+					*/
 					else if (instr->label != NULL) {
 						InsertionResult res;
 						EntryData *label_ptr, *alias_ptr, *extern_ptr;
@@ -133,7 +222,6 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 							exit(-1);
 						}
 						res = stable_insert(label_table, instr->label);
-						/* Na tabela do label se guarda a linha dele */
 						res.data->i = line;
 					}
 					else {
@@ -150,27 +238,39 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 								exit(-1);
 							}
 							res = stable_insert(extern_table, label);
-							/* Ainda deve ser definido o que se guarda na tabela do EXTERN */
+							res->data->i = 1; /* Boolean para dizer que esse label extern existe */
+						}
+					}
+					/* 
+					   Fazendo a lista ligada
+					*/
+					if(f == 0 && isCode(instr)) {
+						if(isPseudoCode(instr))
+							instr = PseudoToCode(instr);
 
+						instr->pos = pos++;
+						instr->lineno = line;
+						start = cur = instr;
+						for(cur = cur; cur->next != NULL; cur = cur->next) {}
+						f = 1;
+					}
+					else if(isCode(instr)) {
+						if(isPseudoCode(instr))
+							instr = PseudoToCode(instr);
+
+						instr->pos = pos++;
+						instr->lineno = line;						
+						cur->next = instr;
+						cur = instr;
+						for(cur = cur; cur->next != NULL; cur = cur->next) {}
+
+					}
+					
 				}
-			} 
-			
+				aux = read_line(input, buffer);
+			}
 		}
-		/* Fazendo a lista ligada
-		[COMENTÁRIO DO LUCAS] DONE
-		Nem todas as instruções entram na lista ligada
-		algumas são pseudocódigo, tipo IS */		
-		if(f == 0) {
-			start = cur = instr;
-			f = 1;
-		}
-		else if(isCode(instr)) {
-			cur->next = insrt;
-			cur = instr;
-		}
-		aux = read_line(input, buffer);
 	}
-
 	buffer_destroy(buffer);
 
 	/*
@@ -183,6 +283,6 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 		  ( %x para o printf ).
 		*/
 		
-		printf("%x%x%x%x", cur->op->opcode, 
+		printf("%x", cur->op->opcode, 
 	}
 }
