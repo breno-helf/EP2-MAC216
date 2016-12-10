@@ -52,24 +52,21 @@ int isCode(Instruction *instr) {
 */
 
 int assemble(const char *filename, FILE *input, FILE *output) {
+	/* A alias type guarda um operand do tipo REG
+	   A label guarda a linha em que a string está
+	   A extern ainda a ser definido
+	*/
 	SymbolTable alias_table, label_table, extern_table;
-	InsertionResult res;
+    unsigned char regs[] = {255,  254,  253,   252,   251, 250};
+    char *regLabels[] =    {"rA", "rR", "rSP", "rX", "rY", "rZ"};
 	alias_table = stable_create();
 	label_table = stable_create();
 	extern_table = stable_create();
-	res = stable_insert(alias_table, rA);
-	res->data->s = 255
-	res = stable_insert(alias_table, rR);
-	res->data->s = 254;
-	res = stable_insert(alias_table, rSP);
-	res->data->s = 253;
-	res = stable_insert(alias_table, rX);
-	res->data->s = 252;
-	res = stable_insert(alias_table, rY);
-	res->data->s = 251;
-	res = stable_insert(alias_table, rZ);
-	res->data->s = 250;
-
+    for (int i = 0; i < 6; i++) {
+        Operand *opd = operand_create_register(regs[i]);
+        InsertionResult res = stable_insert(alias_table, regLabels[i]);
+        res.data->opd = opd;
+	}
 	/*
 	  Usar o parser para fazer a lista ligada de instruções
 	  Lembre-se de sempre atualizar as tabelas de simbolo
@@ -109,8 +106,8 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 							InsertionResult res = stable_insert(alias_table, instr->label);
 							res.data->opd = opd;
 						} else {
-							printf("line %d: %s\n", line, buffer->data);
-							printf("^\n");
+							fprintf(stderr, "line %d: %s\n", line, buffer->data);
+							fprintf(stderr, "^\n");
 							print_error_msg(NULL);
 							exit(-1);
 						}
@@ -122,21 +119,39 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 					talvez tenham que entrar e eu não sei*/
 					else if (instr->label != NULL) {
 						InsertionResult res;
-						EntryData *label_ptr, *alias_ptr;
+						EntryData *label_ptr, *alias_ptr, *extern_ptr;
 						label_ptr = stable_find(label_table, instr->label);
 						alias_ptr = stable_find(alias_table, instr->label);
+						extern_ptr = stable_find(extern_table, instr->label);
 						if(instr->op->opcode == EXTERN) {
-							printf("%s\nlabel %s should not be defined for EXTERN\n", buffer->data, instr->label);
+							fprintf(stderr, "%s\nlabel %s should not be defined for EXTERN\n", buffer->data, instr->label);
+							exit(-1);
 						}
 						
-						if(label_ptr != NULL && alias_ptr != NULL) {							
-							printf("%s\nlabel %s already defined", buffer->data, instr->label);
+						if(label_ptr != NULL || alias_ptr != NULL || extern_ptr != NULL) {							
+							fprintf(stderr, "%s\nlabel %s already defined", buffer->data, instr->label);
 							exit(-1);
 						}
 						res = stable_insert(label_table, instr->label);
-						res.data->str = instr->label;
+						/* Na tabela do label se guarda a linha dele */
+						res.data->i = line;
 					}
-					
+					else {
+						if(instr->op->opcode == EXTERN) {
+							InsertionResult res;
+							EntryData *label_ptr, *alias_ptr, *extern_ptr;
+							char *label;
+							label = instr->opds[0]->value.str;
+							label_ptr = stable_find(label_table, label);
+							alias_ptr = stable_find(alias_table, label);
+							extern_ptr = stable_find(extern_table, label);
+							if(label_ptr != NULL || alias_ptr != NULL || extern_ptr != NULL) {							
+								fprintf(stderr, "%s\nlabel %s already defined", buffer->data, instr->label);
+								exit(-1);
+							}
+							res = stable_insert(extern_table, label);
+							/* Ainda deve ser definido o que se guarda na tabela do EXTERN */
+
 				}
 			} 
 			
