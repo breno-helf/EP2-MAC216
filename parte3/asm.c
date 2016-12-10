@@ -173,9 +173,16 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 
 	buffer_destroy(buffer);
 
-		
 	/*
 	  Após isso percorra a lista gerando o código objeto de cada
 	  instrução, definido por nós mesmos :P
 	*/
+	for(cur = start; cur->next != NULL; cur = cur->next) {
+		/*
+		  Imprime os opcodes e os operandos em Hexadecimal
+		  ( %x para o printf ).
+		*/
+		
+		printf("%x%x%x%x", cur->op->opcode, 
+	}
 }
