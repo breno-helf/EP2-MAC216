@@ -369,9 +369,10 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 				else
 					count += fprintf(output, "%.2x", cur->opds[i]->value.num);
 			}
-			else if (count < 8)
-				fprintf(output, "00");
 		}
+		while (count < 8)
+			count += fprintf(output, "0");
+
 		fprintf(output, "\n");
 	}
 	
