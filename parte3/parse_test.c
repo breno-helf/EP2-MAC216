@@ -68,59 +68,59 @@ int main (int argc, char *argv[])
 	line = 0;
 	aux = read_line(in, buffer);
 	while (aux != -1) {
-	if (aux > 0) {
-		const char *errptr;
-		Instruction *instr;
-		line++;
-		if (parse(buffer->data, alias_table, &instr, &errptr)) {
-			/* Line */
-			printf("line     = %s\n", buffer->data);
-			if (instr != NULL) {
-				/* IS */
-				if (instr->op->opcode == IS) {
-					if(chk_rotulo(instr->label, errptr)) {
-						Operand *opd = operand_create_register(instr->opds[0]->value.reg);
-						InsertionResult res = stable_insert(alias_table, instr->label);
-						res.data->opd = opd;
-					} else {
-						printf("line     %d: %s\n", line, buffer->data);
-						printf("^\n");
-						print_error_msg(NULL);
-						exit(1);
+		if (aux > 0) {
+			const char *errptr;
+			Instruction *instr;
+			line++;
+			if (parse(buffer->data, alias_table, &instr, &errptr)) {
+				/* Line */
+				printf("line     = %s\n", buffer->data);
+				if (instr != NULL) {
+					/* IS */
+					if (instr->op->opcode == IS) {
+						if(chk_rotulo(instr->label, errptr)) {
+							Operand *opd = operand_create_register(instr->opds[0]->value.reg);
+							InsertionResult res = stable_insert(alias_table, instr->label);
+							res.data->opd = opd;
+						} else {
+							printf("line     %d: %s\n", line, buffer->data);
+							printf("^\n");
+							print_error_msg(NULL);
+							exit(1);
+						}
 					}
-				}
-				/* Label */
-				if (instr->label != NULL)
-					printf("label    = \"%s\"\n", instr->label);
-				else
-					printf("label    = n/a\n");
-				/* Operator */
-				printf("operator = %s\n", instr->op->name);
-				/* Operands */
-				printf("operands = ");
-				for (int i = 0; i < 3; i++) {
-					if (instr->opds[i]) {
-						if (i != 0) printf(", ");
-                        if ((instr->opds[i]->type & LABEL) == LABEL)
-                            printf("Label(\"%s\")", instr->opds[i]->value.label);
-                        else if ((instr->opds[i]->type & STRING) == STRING)
-                            printf("String(\"%s\")", instr->opds[i]->value.str);
-                        else if ((instr->opds[i]->type & REGISTER) == REGISTER)
-                            printf("Register(%u)", instr->opds[i]->value.reg);
-						else
-                            printf("Number(%lld)", instr->opds[i]->value.num);
+					/* Label */
+					if (instr->label != NULL)
+						printf("label    = \"%s\"\n", instr->label);
+					else
+						printf("label    = n/a\n");
+					/* Operator */
+					printf("operator = %s\n", instr->op->name);
+					/* Operands */
+					printf("operands = ");
+					for (int i = 0; i < 3; i++) {
+						if (instr->opds[i]) {
+							if (i != 0) printf(", ");
+							if ((instr->opds[i]->type & LABEL) == LABEL)
+								printf("Label(\"%s\")", instr->opds[i]->value.label);
+							else if ((instr->opds[i]->type & STRING) == STRING)
+								printf("String(\"%s\")", instr->opds[i]->value.str);
+							else if ((instr->opds[i]->type & REGISTER) == REGISTER)
+								printf("Register(%u)", instr->opds[i]->value.reg);
+							else
+								printf("Number(%lld)", instr->opds[i]->value.num);
+						}
 					}
-				}
-				printf("\n\n");
-			} else printf("label = n/a\noperator = n/a\noperands = n/a\n\n");
-		} else {
-			printf("line %d: %s\n", line, buffer->data);
-			printf("^\n");
-			print_error_msg(NULL);
-			exit(1);
+					printf("\n\n");
+				} else printf("label = n/a\noperator = n/a\noperands = n/a\n\n");
+			} else {
+				printf("line %d: %s\n", line, buffer->data);
+				printf("^\n");
+				print_error_msg(NULL);
+				exit(1);
+			}
 		}
-    }
-    aux = read_line(in, buffer);
+		aux = read_line(in, buffer);
 	}
 
 	buffer_destroy(buffer);

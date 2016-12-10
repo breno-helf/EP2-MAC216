@@ -44,12 +44,8 @@ int main(int argc, char *argv[]) {
 		outfile = outfile_name(infile);
 		in = fopen(infile, "r");
 		out = fopen(outfile, "w");
-		/*
-		  Aqui é para fazer a chamada da função assemble.
-		  Descomente essa linha quando a função estiver pronta
-		  if(!assemble(infile, in, out)) 
-		      die("error");
-		*/
+		if(!assemble(infile, in, out)) 
+			die("error");
 	}
 	return 0;
 }
