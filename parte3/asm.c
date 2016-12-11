@@ -155,6 +155,8 @@ void set_globalOut(FILE *output) {
 
 int outprint(const char *key, EntryData *data) {
 	if(key == NULL || data == NULL) return 0;
+	if(data->i == -1)
+		die("Label %s never defined\n", key);
 	fprintf(globalOut, "E %s %d\n", key, data->i);
 	return 1;
 }
@@ -172,7 +174,7 @@ int assemble(const char *filename, FILE *input, FILE *output) {
     unsigned char regs[] = {255,  254,  253,   252,   251, 250};
     char *regLabels[] =    {"rA", "rR", "rSP", "rX", "rY", "rZ"};
     Instruction *start, *cur;
-    int line, aux, f = 0, pos = 0, extnum = 0, i;
+    int line, aux, f = 0, pos = 0, i;
 	Buffer *buffer;
 	buffer = buffer_create();
 	alias_table = stable_create();
@@ -225,10 +227,11 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 					*/
 					else if (instr->label != NULL) {
 						InsertionResult res;
-						EntryData *label_ptr, *alias_ptr;
+						EntryData *label_ptr, *alias_ptr, *extern_ptr;
 						
 						label_ptr = stable_find(label_table, instr->label);
 						alias_ptr = stable_find(alias_table, instr->label);
+						extern_ptr = stable_find(extern_table, instr->label);
 
 						if(instr->op->opcode == EXTERN) {
 							fprintf(stderr, "%s\nlabel %s should not be defined for EXTERN\n", buffer->data, instr->label);
@@ -239,6 +242,10 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 							fprintf(stderr, "%s\nlabel %s already defined", buffer->data, instr->label);
 							exit(-1);
 						}
+
+						if(extern_ptr)
+							extern_ptr->i = pos;
+						
 						res = stable_insert(label_table, instr->label);
 						res.data->i = pos;
 					}
@@ -257,7 +264,7 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 								exit(-1);
 							}
 							res = stable_insert(extern_table, label);
-							res.data->i = extnum++; /* numero do EXTERN inserido */
+							res.data->i = -1; /* numero do EXTERN inserido */
 						}
 					}
 					/* 
