@@ -45,14 +45,14 @@ Instruction *pseudoToCode (Instruction *instr)
 		ret = instr_create(instr->label, op, opds);
 		aux = ret;
 
-		op = optable_find("STO");
+		op = optable_find("STOU");
 		opds[0] = operand_create_register(250);
 		opds[1] = operand_create_register(253);
 		opds[2] = operand_create_number(0);
 		aux->next = instr_create(NULL, op, opds);
 		aux = aux->next;
 
-		op = optable_find("ADD");
+		op = optable_find("ADDU");
 		opds[0] = operand_create_register(253);
 		opds[1] = operand_create_register(253);
 		opds[2] = operand_create_number(8);
@@ -69,13 +69,13 @@ Instruction *pseudoToCode (Instruction *instr)
 	}
     /* PUSH */
 	else if (opcode == PUSH) {
-		op = optable_find("STO");
+		op = optable_find("STOU");
 		opds[0] = instr->opds[0];
 		opds[1] = operand_create_register(253);
 		opds[2] = operand_create_number(0);
 		ret = instr_create(instr->label, op, opds);
 
-		op = optable_find("ADD");
+		op = optable_find("ADDU");
 		opds[0] = operand_create_register(253);
 		opds[1] = operand_create_register(253);
 		opds[2] = operand_create_number(8);
@@ -86,14 +86,14 @@ Instruction *pseudoToCode (Instruction *instr)
 	}
     /* RET */
 	else if (opcode == RET) {
-		op = optable_find("SUB");
+		op = optable_find("SUBU");
 		opds[0] = operand_create_register(253);
 		opds[1] = operand_create_register(253);
 		opds[2] = operand_create_number(8*(instr->opds[0]->value.num + 1));
 		ret = instr_create(instr->label, op, opds);
 		aux = ret;
 
-		op = optable_find("LDO");
+		op = optable_find("LDOU");
 		opds[0] = operand_create_register(250);
 		opds[1] = operand_create_register(253);
 		opds[2] = operand_create_number(8*(instr->opds[0]->value.num));
