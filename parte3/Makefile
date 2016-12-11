@@ -7,9 +7,13 @@
 CC = gcc
 CFLAGS = -Wall -std=c99 -O2 -g
 
-all: macas
+all: macas maclk
 
 macas: macas.o stable.o asm.o error.o mactypes.h asmtypes.o optable.o opcodes.h parser.o buffer.o
+	$(CC) $(CFLAGS) $^ -o $@
+	make clean
+
+maclk: maclk.o stable.o error.o mactypes.h asmtypes.o optable.o opcodes.h parser.o buffer.o
 	$(CC) $(CFLAGS) $^ -o $@
 	make clean
 
