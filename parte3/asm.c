@@ -318,6 +318,7 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 		*/
 		int count = 0;
 		f = 0;
+	   
 		if(cur->op->opcode == JMP) {
 			EntryData *label_ptr;
 			label_ptr = stable_find(label_table, cur->opds[0]->value.label);
@@ -361,7 +362,8 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 	out:
 		
 		count += fprintf(output, "%.2x", cur->op->opcode + f);
-	
+
+			
 		for (int i = 0; i < 3; i++) {
 			if (cur->opds[i]) {
 				if ((cur->opds[i]->type & LABEL) == LABEL) {
@@ -375,21 +377,38 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 						die("%s label not defined", cur->opds[i]->value.label);
 					else
 						jmp_line = label_ptr->i;
-					if(jmp_line > cur_line)
-						count += fprintf(output, "%.2x", jmp_line - cur_line);
-					else
-						count += fprintf(output, "%.2x",  cur_line - jmp_line);
+					if(jmp_line > cur_line) {
+						if(cur->opds[1] == NULL)
+							count += fprintf(output, "%.6x", jmp_line - cur_line);
+						else if(cur->opds[2] == NULL)
+							count += fprintf(output, "%.4x", jmp_line - cur_line);
+						else
+							count += fprintf(output, "%.2x", jmp_line - cur_line);
+					}
+					else {
+						if(cur->opds[1] == NULL)
+							count += fprintf(output, "%.6x",  cur_line - jmp_line);
+
+						else if(cur->opds[2] == NULL)
+							count += fprintf(output, "%.4x",  cur_line - jmp_line);
+						else 
+							count += fprintf(output, "%.2x",  cur_line - jmp_line);
+					}
 				}
 				else if ((cur->opds[i]->type & STRING) == STRING)
 					count += fprintf(output, "");
 				else if ((cur->opds[i]->type & REGISTER) == REGISTER)
 					count += fprintf(output, "%.2x", cur->opds[i]->value.reg);
-				else
-					count += fprintf(output, "%.2x", cur->opds[i]->value.num);
+				else {
+					if(cur->opds[1] == NULL)
+						count += fprintf(output, "%.6x", cur->opds[i]->value.num);
+					else if(cur->opds[2] == NULL)
+						count += fprintf(output, "%.4x", cur->opds[i]->value.num);
+					else
+						count += fprintf(output, "%.2x", cur->opds[i]->value.num);
+				}
 			}
 		}
-		while (count < 8)
-			count += fprintf(output, "0");
 
 		fprintf(output, "\n");
 	}
