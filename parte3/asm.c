@@ -240,7 +240,7 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 							exit(-1);
 						}
 						res = stable_insert(label_table, instr->label);
-						res.data->i = line;
+						res.data->i = pos;
 					}
 					else {
 						if(instr->op->opcode == EXTERN) {
@@ -318,28 +318,6 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 		*/
 		int count = 0;
 		f = 0;
-		/* if (cur->label != NULL) */
-		/* 	printf("label    = \"%s\"\n", cur->label); */
-		/* else */
-		/* 	printf("label    = n/a\n"); */
-		/* /\* Operator *\/ */
-		/* printf("operator = %s\n", cur->op->name); */
-		/* /\* Operands *\/ */
-		/* printf("operands = "); */
-		/* for (int i = 0; i < 3; i++) { */
-		/* 	if (cur->opds[i]) { */
-		/* 		if (i != 0) printf(", "); */
-		/* 					if ((cur->opds[i]->type & LABEL) == LABEL) */
-		/* 						printf("Label(\"%s\")", cur->opds[i]->value.label); */
-		/* 					else if ((cur->opds[i]->type & STRING) == STRING) */
-		/* 						printf("String(\"%s\")", cur->opds[i]->value.str); */
-		/* 					else if ((cur->opds[i]->type & REGISTER) == REGISTER) */
-		/* 						printf("Register(%u)", cur->opds[i]->value.reg); */
-		/* 					else */
-		/* 						printf("Number(%lld)", cur->opds[i]->value.num); */
-		/* 	} */
-		/* } */
-		/* printf("\n\n");  */
 		if(cur->op->opcode == JMP) {
 			EntryData *label_ptr;
 			label_ptr = stable_find(label_table, cur->opds[0]->value.label);
