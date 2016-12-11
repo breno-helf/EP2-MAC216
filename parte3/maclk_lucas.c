@@ -14,27 +14,50 @@
 #include "parser.h"
 #include "buffer.h"
 
+int read_l (FILE *input, Buffer *buffer)
+{
+    buffer_reset(buffer);
+    char c = getc(input);
+    while (c != '\n' && c != EOF) {
+        buffer_push_back(buffer, c);
+        c = getc(input);
+    }
+    buffer_push_back(buffer, '\0');
+    if (buffer->i == 1) {
+        if (c == EOF)
+            return -1;
+        return 0;
+    }
+    return (buffer->i - 1);
+}
+
 /* ./maclk teste.mac abc1.maco abc2.maco */
 int main (int argc, char *argv[]) {
 	int i, line,  num_lines, j, k, l;
-	FILE *in, *out;
-	char *infile, *execfile, *buffer_aux;
+	FILE *in, *out, *aux;
+	char *infile, *execfile, *buffer_aux, c;
 	Buffer *buffer;
+	buffer = buffer_create();
 	buffer_aux = malloc (sizeof (char) * 10);
 	SymbolTable extern_table;
 	InsertionResult res;
 	extern_table = stable_create();
 	execfile = argv[1];
 	out = fopen(execfile, "w");
-
-	line = num_lines = 0;
+	in = fopen("temp.txt", "w+");
+	fprintf(in, "* 72 main\n");
+	num_lines = 1;
 	for (i = 2; i < argc; i++) {
 		infile = argv[i];
-		in = fopen(infile, "r");
-		
-		read_line(in, buffer);
+		aux = fopen(infile, "r+");
+		while ((c = getc(aux)) != EOF)
+			fprintf(in, "%c", c);
+		rewind(in);
+		for (j = 0; j < num_lines + (3 * (i - 2)); j++)
+			read_l(in, buffer);
+		read_l(in, buffer);
 		l = atoi(buffer->data);
-		read_line(in, buffer);
+		read_l(in, buffer);
 		while (buffer->data[0] == 'E') {
 			k = 0;
 			for (j = 2; buffer->data[j] != ' '; j++) {
@@ -42,37 +65,43 @@ int main (int argc, char *argv[]) {
 				k++;
 			}
 			buffer_aux[k] = '\0';
-			if (stable_find(extern_table, buffer_aux) != NULL)
+			res.data = stable_find (extern_table, buffer_aux);
+			if (res.data != NULL)
 				die("%s label already defined\n", buffer_aux);
 			res = stable_insert(extern_table, buffer_aux);
 			res.data->i = atoi(&(buffer->data[j + 1])) + num_lines;
+			read_l (in, buffer);
 		}
 		num_lines += l;
-		while (read_line (in, buffer) != -1);
+		while (read_l (in, buffer) != -1);
 	}
 	if (stable_find(extern_table, "main") == NULL)
 		die("main not defined\n");
 	rewind(in);
 	i = line = 0;
-	while (read_line(in, buffer) != -1) {
+	read_l (in, buffer);
+	res.data = stable_find (extern_table, &(buffer->data[5]));
+	k = (res.data->i) - line;
+	fprintf(out, "48%.6X\n", k);
+	line++;
+	while (read_l (in, buffer) != -1) {
 		i = atoi(buffer->data);
 		while (buffer->data[0] != 'B')
-			read_line(in, buffer);
-		read_line(in, buffer);
+			read_l (in, buffer);
 		for (j = 0; j < i; j++) {
+			read_l (in, buffer);
 			if (buffer->data[0] == '*') {
 				res.data = stable_find (extern_table, &(buffer->data[5]));
 				if (res.data == NULL)
 					die("%s not defined\n", &(buffer->data[5]));
-				k = res.data->i - line;
+				k = (res.data->i) - line;
 				if (k < 0)
-					fprintf(out, "49%06x\n", -k);
+					fprintf(out, "49%.6X\n", -k);
 				else
-					fprintf(out, "48%06x\n", k);
+					fprintf(out, "48%.6X\n", k);
 			}
 			else
-				fprintf(out, "%s", buffer->data);
-			read_line(in, buffer);
+				fprintf(out, "%s\n", buffer->data);
 			line ++;
 		}
 	}
