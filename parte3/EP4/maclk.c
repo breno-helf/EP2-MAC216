@@ -3,6 +3,7 @@
     Lucas Daher                 NUSP: 8991769
     Raphael dos Reis Gusmao     NUSP: 9778561
 */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "error.h"
@@ -31,7 +32,6 @@ int read_l (FILE *input, Buffer *buffer)
     return (buffer->i - 1);
 }
 
-/* ./maclk teste.mac abc1.maco abc2.maco */
 int main (int argc, char *argv[]) {
 	int i, line,  num_lines, j, k, l;
 	FILE *in, *out, *aux;
@@ -48,6 +48,11 @@ int main (int argc, char *argv[]) {
 	fprintf(in, "* 72 main\n");
 	num_lines = 1;
 	for (i = 2; i < argc; i++) {
+	/*lê arquivos de entrada, lê externs e coloca
+	na extern_table, além de calcular a linha a que
+	cada label se refere, no arquivo montado,
+	acusa erro se o mesmo label for definido mais de
+	uma vez*/
 		infile = argv[i];
 		aux = fopen(infile, "r+");
 		while ((c = getc(aux)) != EOF)
@@ -75,6 +80,7 @@ int main (int argc, char *argv[]) {
 		num_lines += l;
 		while (read_l (in, buffer) != -1);
 	}
+	/*verifica se a main foi definida*/
 	if (stable_find(extern_table, "main") == NULL)
 		die("main not defined\n");
 	rewind(in);
@@ -84,6 +90,9 @@ int main (int argc, char *argv[]) {
 	k = (res.data->i) - line;
 	fprintf(out, "48%.6X\n", k);
 	line++;
+    /*imprime os comandos na saída, calculando os jumps
+    dos externs, dá erro se o jump por para algum extern
+    não definido*/
 	while (read_l (in, buffer) != -1) {
 		i = atoi(buffer->data);
 		while (buffer->data[0] != 'B')
