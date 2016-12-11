@@ -31,8 +31,11 @@ Instruction* pseudoToCode (Instruction *instr);
 void set_globalOut (FILE *output);
 
 /*
-    ?
+    Imprime o label e sua key no arquivo de saida
 */
 int outPrint (const char *key, EntryData *data);
 
+/*
+    Faz a montagem do programa
+*/
 int assemble (const char *filename, FILE *input, FILE *output);

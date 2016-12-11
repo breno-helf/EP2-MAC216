@@ -58,10 +58,12 @@ int main (int argc, char *argv[])
     						InsertionResult res = stable_insert(alias_table, instr->label);
     						res.data->opd = opd;
     					} else {
-    						printf("line     %d: %s\n", line, buffer->data);
-    						printf("^\n");
-    						print_error_msg(NULL);
-    						exit(1);
+							fprintf(stderr, "line %d: %s\n", line, buffer->data);
+			    			fprintf(stderr, "        ");
+			                for (char *p = buffer->data; p != errptr; p++)
+								fprintf(stderr, " ");
+			                fprintf(stderr, "^\n");
+			    			exit(1);
     					}
     				}
     				/* Label */
@@ -91,7 +93,8 @@ int main (int argc, char *argv[])
     		} else {
     			fprintf(stderr, "line %d: %s\n", line, buffer->data);
     			fprintf(stderr, "        ");
-                for (char *p = buffer->data; p != errptr; p++) fprintf(stderr, " ");
+                for (char *p = buffer->data; p != errptr; p++)
+					fprintf(stderr, " ");
                 fprintf(stderr, "^\n");
     			exit(1);
     		}
