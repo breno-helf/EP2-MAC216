@@ -96,12 +96,12 @@ int main (int argc, char *argv[]) {
 					die("%s not defined\n", &(buffer->data[5]));
 				k = (res.data->i) - line;
 				if (k < 0)
-					fprintf(out, "49%.6X\n", -k);
+					fprintf(out, "49%.6x\n", -k);
 				else
-					fprintf(out, "48%.6X\n", k);
+					fprintf(out, "48%.6x\n", k);
 			}
 			else
-				fprintf(out, "%s\n", buffer->data);
+			    fprintf(out, "%s\n", buffer->data);
 			line ++;
 		}
 	}
