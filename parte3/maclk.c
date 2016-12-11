@@ -10,72 +10,100 @@
 #include "asmtypes.h"
 #include "optable.h"
 #include "opcodes.h"
+#include "stable.h"
+#include "parser.h"
+#include "buffer.h"
 
-/* ./maclk teste.mac abc1.maco abc2.maco */
-int main (int argc, char *argv[])
+int read_l (FILE *input, Buffer *buffer)
 {
-	int i, line, hasMain;
-	FILE *in, *out;
-	char *infile, *execfile;
-	execfile = argv[1];
-	out = fopen(outfile, "w");
-
-	hasMain = line = 0;
-	for (i = 2; i < argc; i++) {
-		infile = argv[i];
-		in = fopen(infile, "r");
-
-	    while (read_line(in, buffer)) {
-	        char *str = buffer->data;
-	        line++;
-
-			/* if ( linha exportando main ) hasMain = 1; */
-
-			/*
-			Tenta inserir o rotulo exportado na STable
-			Se ja estiver la
-				die("rotulo %s definido mais de uma vez!\n", rotulo);
-			*/
-
-			fprintf(out, "%s\n", str);
-	    }
-	}
-
-	if (!hasMain) die("Rotulo main nao definido!\n");
-
-	while (read_line(out, buffer)) {
-		char *str = buffer->data;
-		line++;
-
-		 /* Uma linha com rotulo nao definido comeca com "*"
-		 ("* x rotulo", x == numero da linha do arquivo in?)*/
-		if (str[0] == '*') {
-			/*
-			Rotulo nao resolvido
-			Procurar rotulo na STable
-			Se nao estiver la
-				die("rotulo %s nao definido!\n", rotulo);
-			Calcular deslocamento
-			Substitui o valor na linha
-			*/
-		}
-
-	}
-
-	return 0;
+    buffer_reset(buffer);
+    char c = getc(input);
+    while (c != '\n' && c != EOF) {
+        buffer_push_back(buffer, c);
+        c = getc(input);
+    }
+    buffer_push_back(buffer, '\0');
+    if (buffer->i == 1) {
+        if (c == EOF)
+            return -1;
+        return 0;
+    }
+    return (buffer->i - 1);
 }
 
-/*
-Vinculador
-O vinculador é ainda mais simples de escrever do que o montador.  Ele  pode  ser
-composto de apenas um arquivo maclk.c. Seu trabalho  consiste  em  ler  diversos
-arquivos com código-objeto e montar o  programa  final  em  código  de  máquina.
-O vinculador deve verificar se os rótulos não-resolvidos de cada  arquivo  foram
-exportados por algum  outro  arquivo  para  calcular  os  deslocamentos  finais.
-O vinculador também deve certificar-se de que o rótulo main  foi  exportado  por
-algum arquivo, para poder fazer com  que  o  programa  comece  no  lugar  certo.
-O vinculador captura três tipos de erro:
-    - rótulo main não definido;
-	- um mesmo rótulo definido mais de uma vez;
-	- algum rótulo não definido.
-*/
+/* ./maclk teste.mac abc1.maco abc2.maco */
+int main (int argc, char *argv[]) {
+	int i, line,  num_lines, j, k, l;
+	FILE *in, *out, *aux;
+	char *infile, *execfile, *buffer_aux, c;
+	Buffer *buffer;
+	buffer = buffer_create();
+	buffer_aux = malloc (sizeof (char) * 10);
+	SymbolTable extern_table;
+	InsertionResult res;
+	extern_table = stable_create();
+	execfile = argv[1];
+	out = fopen(execfile, "w");
+	in = fopen("temp.txt", "w+");
+	fprintf(in, "* 72 main\n");
+	num_lines = 1;
+	for (i = 2; i < argc; i++) {
+		infile = argv[i];
+		aux = fopen(infile, "r+");
+		while ((c = getc(aux)) != EOF)
+			fprintf(in, "%c", c);
+		rewind(in);
+		for (j = 0; j < num_lines + (3 * (i - 2)); j++)
+			read_l(in, buffer);
+		read_l(in, buffer);
+		l = atoi(buffer->data);
+		read_l(in, buffer);
+		while (buffer->data[0] == 'E') {
+			k = 0;
+			for (j = 2; buffer->data[j] != ' '; j++) {
+				buffer_aux[k] = buffer->data[j];
+				k++;
+			}
+			buffer_aux[k] = '\0';
+			res.data = stable_find (extern_table, buffer_aux);
+			if (res.data != NULL)
+				die("%s label already defined\n", buffer_aux);
+			res = stable_insert(extern_table, buffer_aux);
+			res.data->i = atoi(&(buffer->data[j + 1])) + num_lines;
+			read_l (in, buffer);
+		}
+		num_lines += l;
+		while (read_l (in, buffer) != -1);
+	}
+	if (stable_find(extern_table, "main") == NULL)
+		die("main not defined\n");
+	rewind(in);
+	i = line = 0;
+	read_l (in, buffer);
+	res.data = stable_find (extern_table, &(buffer->data[5]));
+	k = (res.data->i) - line;
+	fprintf(out, "48%.6X\n", k);
+	line++;
+	while (read_l (in, buffer) != -1) {
+		i = atoi(buffer->data);
+		while (buffer->data[0] != 'B')
+			read_l (in, buffer);
+		for (j = 0; j < i; j++) {
+			read_l (in, buffer);
+			if (buffer->data[0] == '*') {
+				res.data = stable_find (extern_table, &(buffer->data[5]));
+				if (res.data == NULL)
+					die("%s not defined\n", &(buffer->data[5]));
+				k = (res.data->i) - line;
+				if (k < 0)
+					fprintf(out, "49%.6x\n", -k);
+				else
+					fprintf(out, "48%.6x\n", k);
+			}
+			else
+			    fprintf(out, "%s\n", buffer->data);
+			line ++;
+		}
+	}
+	return 0;
+}
