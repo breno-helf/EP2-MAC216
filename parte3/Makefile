@@ -6,18 +6,10 @@
 .PHONY: clean
 CC = gcc
 CFLAGS = -Wall -std=c99 -O2 -g
-OBJS = \
-	parse_test.o \
-	stable.o \
-	parser.o \
-	optable.o \
-	error.o \
-	buffer.o \
-	asmtypes.o
 
-all: parser
+all: macas
 
-parser: $(OBJS)
+macas: macas.o stable.o asm.o error.o mactypes.h asmtypes.o optable.o opcodes.h parser.o buffer.o
 	$(CC) $(CFLAGS) $^ -o $@
 	make clean
 

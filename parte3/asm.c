@@ -178,6 +178,9 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 	alias_table = stable_create();
 	label_table = stable_create();
 	extern_table = stable_create();
+
+	
+	
     for (int i = 0; i < 6; i++) {
         Operand *opd = operand_create_register(regs[i]);
         InsertionResult res = stable_insert(alias_table, regLabels[i]);
@@ -194,7 +197,7 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 	while (aux != -1) {
 		if (aux > 0) {
 			const char *errptr;
-			Instruction *instr;		 
+			Instruction *instr = malloc(sizeof(Instruction));		 
 			if (parse(buffer->data, alias_table, &instr, &errptr)) {				
 				line++;
 				if (instr != NULL) {
@@ -202,7 +205,8 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 					/* IS */
 					if (instr->op->opcode == IS) {
 						/*Diferenciar mensagens de erro para cada erro */
-						EntryData *label_ptr, *alias_ptr, *extern_ptr;
+						EntryData *label_ptr, *alias_ptr;
+
 						label_ptr = stable_find(label_table, instr->label);
 						alias_ptr = stable_find(alias_table, instr->label);
 						if(label_ptr == NULL && alias_ptr == NULL && chk_rotulo(instr->label, errptr)) {
@@ -221,7 +225,8 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 					*/
 					else if (instr->label != NULL) {
 						InsertionResult res;
-						EntryData *label_ptr, *alias_ptr, *extern_ptr;
+						EntryData *label_ptr, *alias_ptr;
+						
 						label_ptr = stable_find(label_table, instr->label);
 						alias_ptr = stable_find(alias_table, instr->label);
 
@@ -243,6 +248,7 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 							EntryData *label_ptr, *alias_ptr, *extern_ptr;
 							char *label;
 							label = instr->opds[0]->value.str;
+							
 							label_ptr = stable_find(label_table, label);
 							alias_ptr = stable_find(alias_table, label);
 							extern_ptr = stable_find(extern_table, label);
@@ -305,12 +311,13 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 	set_globalOut(output);
 	stable_visit(extern_table, outprint);
 	fprintf(output, "B\n");
-	for(cur = start; cur->next != NULL; cur = cur->next) {
+	for(cur = start; cur != NULL; cur = cur->next) {
 		/*
 		  Imprime os opcodes e os operandos em Hexadecimal
 		  ( %x para o printf ).
 		*/
 		int count = 0;
+		f = 0;
 		/* if (cur->label != NULL) */
 		/* 	printf("label    = \"%s\"\n", cur->label); */
 		/* else */
@@ -342,7 +349,40 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 			}
 		}
 
-		count += fprintf(output, "%.2x", cur->op->opcode);
+		if(cur->op->opcode >= 0x48 && cur->op->opcode <= 0x55) {
+			int cur_line, jmp_line;
+			EntryData *label_ptr;
+			cur_line = cur->pos;
+			if(cur->op->opcode == 0x48) {
+				if(cur->opds[0]->type != LABEL)
+					goto out;
+				i = 0;
+			}
+			else {
+				if(cur->opds[1]->type != LABEL)
+					goto out;
+				i = 1;
+			}
+			label_ptr = stable_find(label_table, cur->opds[i]->value.label);
+			
+			
+			if(label_ptr == NULL)
+				die("%s label not defined", cur->opds[i]->value.label);
+			jmp_line = label_ptr->i;
+
+			if(cur_line > jmp_line)
+				f = 1;
+
+		}
+		else {
+			if(cur->opds[2]) {
+				if((cur->op->opcode%2 == 0) && cur->opds[2]->type == NUMBER_TYPE)
+					f = 1;			
+			}
+		}
+	out:
+		
+		count += fprintf(output, "%.2x", cur->op->opcode + f);
 	
 		for (int i = 0; i < 3; i++) {
 			if (cur->opds[i]) {
