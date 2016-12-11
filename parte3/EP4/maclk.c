@@ -105,5 +105,6 @@ int main (int argc, char *argv[]) {
 			line ++;
 		}
 	}
+	remove("temp.txt");
 	return 0;
 }
