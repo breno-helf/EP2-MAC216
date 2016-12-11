@@ -23,13 +23,13 @@ int checkRotulo (char *str, const char *errptr)
     int i = 1;
     if (!(isalpha(str[0]) || str[0] == '_')) {
         errptr = &str[0];
-		set_error_msg("primeiro char nao eh letra ou underscore");
+		set_error_msg("first character must be a letter or an underscore");
 		return 0;
     }
     while (str[i] != '\0') {
         if (!isCharValid(str[i])) {
 			errptr = &str[i];
-			set_error_msg("Encontrado char que nao eh numero, letra ou underscore");
+			set_error_msg("invalid character");
 			return 0;
         }
         i++;
@@ -83,14 +83,14 @@ int parse (const char *s, SymbolTable alias_table, Instruction **instr, const ch
 
     /* Verifica se o rotulo tem tamanho valido */
     if (j == 16) {
-        set_error_msg("Rotulo invalido");
+        set_error_msg("invalid label");
         *errptr = rotulo;
         return 0;
     }
 
     /* Verifica se o rotulo eh valido */
     if (!checkRotulo(rotulo, *errptr)) {
-		set_error_msg("Rotulo invalido");
+		set_error_msg("invalid label");
         return 0;
     }
 
@@ -101,7 +101,7 @@ int parse (const char *s, SymbolTable alias_table, Instruction **instr, const ch
 	} else {
         /* Verifica se o rotulo ja existe */
     	if (stable_find(alias_table, rotulo) != NULL) {
-            set_error_msg("Rotulo ja existe");
+            set_error_msg("label already exists");
             *errptr = rotulo;
             return 0;
         }
@@ -121,7 +121,7 @@ int parse (const char *s, SymbolTable alias_table, Instruction **instr, const ch
 
         /* Verifica se eh um operador */
     	if (!(op = optable_find(operador))) {
-            set_error_msg("Nao eh operador");
+            set_error_msg("invalid operator");
     		*errptr = operador;
     		return 0;
     	}
@@ -148,24 +148,24 @@ int parse (const char *s, SymbolTable alias_table, Instruction **instr, const ch
 
             /* Verifica se o operando tem tamanho valido */
             if (j == 0) {
-                set_error_msg("Operando faltando");
+                set_error_msg("expected operand");
                 return 0;
             }
 
             /* Verifica se o operando tem tamanho valido */
             if (j == 16) {
-                set_error_msg("Operando invalido");
+                set_error_msg("invalid operand");
                 return 0;
             }
 
             /* Verifica se o operando esta na tabela de alias */
             data = stable_find(alias_table, opd_read[opnum]);
 
-            /* Se o operando lido for um alias */
+            /* Se o operando for um alias */
             if (data != NULL) {
                 (*instr)->opds[opnum] = data->opd;
             }
-            /* Se o operando esperado for um label */
+            /* Se o operando for um label */
             else if (((*instr)->op->opd_types[opnum] & LABEL) == LABEL) {
 
                 (*instr)->opds[opnum] = operand_create_label(opd_read[opnum]);
@@ -175,14 +175,14 @@ int parse (const char *s, SymbolTable alias_table, Instruction **instr, const ch
 
 				int k = 1;
 				(*instr)->opds[opnum] = operand_create_register(atoi(&opd_read[opnum][k]));
-                
+
             }
-            /* Se o operando esperado for uma string */
+            /* Se o operando for uma string */
             else if (((*instr)->op->opd_types[opnum] & STRING) == STRING) {
 
                 (*instr)->opds[opnum] = operand_create_string(opd_read[opnum]);
             }
-            /* Se o operando for um numero hexadecimal */
+            /* Se o operando for um numero */
             else {
 
                 if (opd_read[opnum][0] == '#')

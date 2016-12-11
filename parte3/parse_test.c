@@ -14,31 +14,6 @@
 #include "parser.h"
 #include "buffer.h"
 
-int check_char (char c)
-{
-    return ((c > 64 && c < 91) || (c == 95) || (c > 96 && c < 123) || (c > 47 && c < 58));
-}
-
-int chk_rotulo(char *stg, const char *errptr)
-{
-    int i = 1, j;
-    if (!(isalpha(stg[0]) || stg[0] == 95)) {
-        errptr = &stg[0];
-		set_error_msg("primeiro char nao eh letra ou underscore");
-		return 0;
-    }
-    while (stg[i] != '\0') {
-        j = check_char(stg[i]);
-        if (!j) {
-			errptr = &stg[i];
-			set_error_msg("Encontrado char que nao eh numero, letra ou underscore");
-			return 0;
-        }
-        i++;
-    }
-    return 1;
-}
-
 int main (int argc, char *argv[])
 {
 	int line, aux;
@@ -78,7 +53,7 @@ int main (int argc, char *argv[])
     			if (instr != NULL) {
     				/* IS */
     				if (instr->op->opcode == IS) {
-    					if(checkRotulo(instr->label, errptr)) {
+    					if (checkRotulo(instr->label, errptr)) {
     						Operand *opd = operand_create_register(instr->opds[0]->value.reg);
     						InsertionResult res = stable_insert(alias_table, instr->label);
     						res.data->opd = opd;

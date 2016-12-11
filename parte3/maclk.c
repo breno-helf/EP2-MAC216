@@ -4,7 +4,7 @@
     Raphael dos Reis Gusmao     NUSP: 9778561
 */
 #include <stdio.h>
-#include <stlib.h>
+#include <stdlib.h>
 #include "error.h"
 #include "mactypes.h"
 #include "asmtypes.h"
