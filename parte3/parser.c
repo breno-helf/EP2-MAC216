@@ -137,7 +137,8 @@ int parse (const char *s, SymbolTable alias_table, Instruction **instr, const ch
             /* Guarda em opd_read[opnum] a proxima palavra encontrada */
             opd_read[opnum] = emalloc(sizeof(char) * 16);
             if (!opnum) for (; isspace(s[i]); i++);
-            else for (; isspace(s[i]) || s[i] == ','; i++);
+            else for (; (isspace(s[i]) || s[i] == ','); i++);
+            *errptr = &s[i];
             j = 0;
             while (!(isspace(s[i])) && s[i] != '\0' && s[i] != ',' && j < 16) {
                 opd_read[opnum][j] = s[i];
@@ -148,14 +149,12 @@ int parse (const char *s, SymbolTable alias_table, Instruction **instr, const ch
             /* Verifica se o operando tem tamanho valido */
             if (j == 0) {
                 set_error_msg("Operando faltando");
-                *errptr = &opd_read[opnum];
                 return 0;
             }
 
             /* Verifica se o operando tem tamanho valido */
             if (j == 16) {
                 set_error_msg("Operando invalido");
-                *errptr = &opd_read[opnum];
                 return 0;
             }
 
@@ -177,7 +176,6 @@ int parse (const char *s, SymbolTable alias_table, Instruction **instr, const ch
                     while(!isdigit(opd_read[opnum][k]) && k < 16) k++;
                     if (k == 16) {
                         set_error_msg("Operando invalido");
-                        *errptr = &opd_read[opnum];
                         return 0;
                     }
                     (*instr)->opds[opnum] = operand_create_register(atoi(&opd_read[opnum][k]));

@@ -114,13 +114,10 @@ int main (int argc, char *argv[])
     				printf("\n\n");
     			} else printf("label = n/a\noperator = n/a\noperands = n/a\n\n");
     		} else {
-    			printf("line %d: %s\n", line, buffer->data);
-    			printf("        ", errptr, *errptr);
-                errptr = &(buffer->data[8]);
-                for (char *p = &(buffer->data); p != errptr; p++) printf(" ");
-                printf("^\n");
-                printf("p:%p, *p:%d\n\n\n", errptr, *errptr);
-    			print_error_msg(NULL);
+    			fprintf(stderr, "line %d: %s\n", line, buffer->data);
+    			fprintf(stderr, "        ");
+                for (char *p = buffer->data; p != errptr; p++) fprintf(stderr, " ");
+                fprintf(stderr, "^\n");
     			exit(1);
     		}
         }
