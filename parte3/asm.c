@@ -3,9 +3,9 @@
     Lucas Daher                 NUSP: 8991769
     Raphael dos Reis Gusmao     NUSP: 9778561
 */
-#include<stdio.h>
-#include<stdlib.h>
-#include<ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
 #include "stable.h"
 #include "asm.h"
 #include "error.h"
@@ -18,93 +18,64 @@
 
 FILE *globalOut;
 
-int check_char (char c)
+int isCode (Instruction *instr)
 {
-    return ((c > 64 && c < 91) || (c == 95) || (c > 96 && c < 123) || (c > 47 && c < 58));
+	return (instr->op->opcode != EXTERN && instr->op->opcode != IS);
 }
 
-int chk_rotulo(char *stg, const char *errptr)
+int isPseudoCode (Instruction *instr)
 {
-    int i = 1, j;
-    if (!(isalpha(stg[0]) || stg[0] == 95)) {
-        errptr = &stg[0];
-		set_error_msg("primeiro char nao eh letra ou underscore");
-		return 0;
-    }
-    while (stg[i] != '\0') {
-        j = check_char(stg[i]);
-        if (!j) {
-			errptr = &stg[i];
-			set_error_msg("Encontrado char que nao eh numero, letra ou underscore");
-			return 0;
-        }
-        i++;
-    }
-    return 1;
+	int opcode = instr->op->opcode;
+	return (opcode == CALL || opcode == PUSH || opcode == RET);
 }
 
-int isCode(Instruction *instr) {
-	if(instr->op->opcode != EXTERN && instr->op->opcode != IS)
-		return 1;
-	else
-		return 0;
-}
-
-int isPseudoCode(Instruction *instr) {
-	int var;
-	var = instr->op->opcode;
-	return (var == CALL || var == PUSH || var == RET);
-}
-
-Instruction* PseudoToCode(Instruction *instr) {
+Instruction *pseudoToCode (Instruction *instr)
+{
 	Instruction *ret, *aux;
-	int var;
-	var = instr->op->opcode;
-	if(var == CALL) {
-		Operator *op;
-		Operand *opds[3];
-		
+    Operator *op;
+    Operand *opds[3];
+	int opcode = instr->op->opcode;
+
+    /* CALL */
+	if (opcode == CALL) {
 		op = optable_find("GETA");
 		opds[0] = operand_create_register(250);
 		opds[1] = operand_create_number(4);
 		opds[2] = NULL;
 		ret = instr_create(instr->label, op, opds);
 		aux = ret;
-		
-		op = optable_find("STO");
+
+		op = optable_find("STOU");
 		opds[0] = operand_create_register(250);
 		opds[1] = operand_create_register(253);
 		opds[2] = operand_create_number(0);
 		aux->next = instr_create(NULL, op, opds);
 		aux = aux->next;
 
-		op = optable_find("ADD");
+		op = optable_find("ADDU");
 		opds[0] = operand_create_register(253);
 		opds[1] = operand_create_register(253);
-		opds[2] = operand_create_number(8);				
+		opds[2] = operand_create_number(8);
 		aux->next = instr_create(NULL, op, opds);
 		aux = aux->next;
 
 		op = optable_find("JMP");
 		opds[0] = instr->opds[0];
 		opds[1] = NULL;
-		opds[2] = NULL;						
+		opds[2] = NULL;
 		aux->next = instr_create(NULL, op, opds);
 		aux = aux->next;
 		aux->next = NULL;
-		return ret;
 	}
-	else if(var == PUSH) {
-		Operator *op;
-		Operand *opds[3];
-
-		op = optable_find("STO");
+    /* PUSH */
+	else if (opcode == PUSH) {
+		op = optable_find("STOU");
 		opds[0] = instr->opds[0];
 		opds[1] = operand_create_register(253);
 		opds[2] = operand_create_number(0);
 		ret = instr_create(instr->label, op, opds);
-		
-		op = optable_find("ADD");
+
+		op = optable_find("ADDU");
 		opds[0] = operand_create_register(253);
 		opds[1] = operand_create_register(253);
 		opds[2] = operand_create_number(8);
@@ -112,20 +83,17 @@ Instruction* PseudoToCode(Instruction *instr) {
 		aux->next = instr_create(NULL, op, opds);
 		aux = aux->next;
 		aux->next = NULL;
-		return ret;
 	}
-	else if(var == RET) {
-		Operator *op;
-		Operand *opds[3];
-		
-		op = optable_find("SUB");
+    /* RET */
+	else if (opcode == RET) {
+		op = optable_find("SUBU");
 		opds[0] = operand_create_register(253);
 		opds[1] = operand_create_register(253);
 		opds[2] = operand_create_number(8*(instr->opds[0]->value.num + 1));
 		ret = instr_create(instr->label, op, opds);
 		aux = ret;
-		
-		op = optable_find("LDO");
+
+		op = optable_find("LDOU");
 		opds[0] = operand_create_register(250);
 		opds[1] = operand_create_register(253);
 		opds[2] = operand_create_number(8*(instr->opds[0]->value.num));
@@ -135,72 +103,70 @@ Instruction* PseudoToCode(Instruction *instr) {
 		op = optable_find("GO");
 		opds[0] = operand_create_register(250);
 		opds[1] = operand_create_number(0);
-		opds[2] = NULL;				
+		opds[2] = NULL;
 		aux->next = instr_create(NULL, op, opds);
 		aux = aux->next;
 		aux->next = NULL;
-		return ret;
 	}
-	else {
-		die("Você usou a função de converter código em pseudocódigo em algo que não é pseudocódigo");
-		return instr;
-	}
-	
-	
+    /* Erro */
+	else die("Voce usou a funcao de converter codigo em pseudocodigo em algo que nao eh pseudocodigo");
+
+    return ret;
 }
 
-void set_globalOut(FILE *output) {
+void set_globalOut (FILE *output)
+{
 	globalOut = output;
 }
 
-int outprint(const char *key, EntryData *data) {
-	if(key == NULL || data == NULL) return 0;
-	if(data->i == -1)
+int outPrint (const char *key, EntryData *data)
+{
+	if (key == NULL || data == NULL) return 0;
+	if (data->i == -1)
 		die("Label %s never defined\n", key);
 	fprintf(globalOut, "E %s %d\n", key, data->i);
 	return 1;
 }
 
-/*
-  Implementar a função
-*/
-
-int assemble(const char *filename, FILE *input, FILE *output) {
-	/* A alias type guarda um operand do tipo REG
-	   A label guarda a linha em que a string está
-	   A extern guarda o numero do EXTERN
+int assemble (const char *filename, FILE *input, FILE *output) {
+	/*
+        A alias type guarda um operand do tipo REG
+        A label guarda a linha em que a string está
+        A extern guarda o numero do EXTERN
 	*/
 	SymbolTable alias_table, label_table, extern_table;
-    unsigned char regs[] = {255,  254,  253,   252,   251, 250};
-    char *regLabels[] =    {"rA", "rR", "rSP", "rX", "rY", "rZ"};
     Instruction *start, *cur;
     int line, aux, f = 0, pos = 0, i;
 	Buffer *buffer;
+
+    /* Inicializacoes */
 	buffer = buffer_create();
 	alias_table = stable_create();
 	label_table = stable_create();
 	extern_table = stable_create();
 
-	
-	
+    /* Default */
+    unsigned char regs[] = {255,  254,  253,   252,   251, 250};
+    char *regLabels[] =    {"rA", "rR", "rSP", "rX", "rY", "rZ"};
     for (int i = 0; i < 6; i++) {
         Operand *opd = operand_create_register(regs[i]);
         InsertionResult res = stable_insert(alias_table, regLabels[i]);
         res.data->opd = opd;
-	}
+    }
+
 	/*
-	  Usar o parser para fazer a lista ligada de instruções
-	  Lembre-se de sempre atualizar as tabelas de simbolo
-	  acima quando necessário.
+        Usar o parser para fazer a lista ligada de instrucoes
+        Lembre-se de sempre atualizar as tabelas de simbolos
+        acima quando necessario.
 	*/
-    	
+
 	line = 0;
 	aux = read_line(input, buffer);
 	while (aux != -1) {
 		if (aux > 0) {
 			const char *errptr;
-			Instruction *instr = malloc(sizeof(Instruction));		 
-			if (parse(buffer->data, alias_table, &instr, &errptr)) {				
+			Instruction *instr = malloc(sizeof(Instruction));
+			if (parse(buffer->data, alias_table, &instr, &errptr)) {
 				line++;
 				if (instr != NULL) {
 					instr->next = NULL;
@@ -211,7 +177,7 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 
 						label_ptr = stable_find(label_table, instr->label);
 						alias_ptr = stable_find(alias_table, instr->label);
-						if(label_ptr == NULL && alias_ptr == NULL && chk_rotulo(instr->label, errptr)) {
+						if(label_ptr == NULL && alias_ptr == NULL && checkRotulo(instr->label, errptr)) {
 							Operand *opd = operand_create_register(instr->opds[0]->value.reg);
 							InsertionResult res = stable_insert(alias_table, instr->label);
 							res.data->opd = opd;
@@ -222,13 +188,13 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 							exit(-1);
 						}
 					}
-					/* 
+					/*
 					   Label
 					*/
 					else if (instr->label != NULL) {
 						InsertionResult res;
 						EntryData *label_ptr, *alias_ptr, *extern_ptr;
-						
+
 						label_ptr = stable_find(label_table, instr->label);
 						alias_ptr = stable_find(alias_table, instr->label);
 						extern_ptr = stable_find(extern_table, instr->label);
@@ -237,15 +203,15 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 							fprintf(stderr, "%s\nlabel %s should not be defined for EXTERN\n", buffer->data, instr->label);
 							exit(-1);
 						}
-						
-						if(label_ptr != NULL || alias_ptr != NULL) {							
+
+						if(label_ptr != NULL || alias_ptr != NULL) {
 							fprintf(stderr, "%s\nlabel %s already defined", buffer->data, instr->label);
 							exit(-1);
 						}
 
 						if(extern_ptr)
 							extern_ptr->i = pos;
-						
+
 						res = stable_insert(label_table, instr->label);
 						res.data->i = pos;
 					}
@@ -255,11 +221,11 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 							EntryData *label_ptr, *alias_ptr, *extern_ptr;
 							char *label;
 							label = instr->opds[0]->value.str;
-							
+
 							label_ptr = stable_find(label_table, label);
 							alias_ptr = stable_find(alias_table, label);
 							extern_ptr = stable_find(extern_table, label);
-							if(label_ptr != NULL || alias_ptr != NULL || extern_ptr != NULL) {							
+							if(label_ptr != NULL || alias_ptr != NULL || extern_ptr != NULL) {
 								fprintf(stderr, "%s\nlabel %s already defined", buffer->data, instr->label);
 								exit(-1);
 							}
@@ -267,12 +233,12 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 							res.data->i = -1; /* numero do EXTERN inserido */
 						}
 					}
-					/* 
+					/*
 					   Fazendo a lista ligada
 					*/
 					if(f == 0 && isCode(instr)) {
 						if(isPseudoCode(instr))
-							instr = PseudoToCode(instr);
+							instr = pseudoToCode(instr);
 
 						instr->pos = pos++;
 						instr->lineno = line;
@@ -288,10 +254,10 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 					}
 					else if(isCode(instr)) {
 						if(isPseudoCode(instr))
-							instr = PseudoToCode(instr);
+							instr = pseudoToCode(instr);
 
 						instr->pos = pos++;
-						instr->lineno = line;						
+						instr->lineno = line;
 						cur->next = instr;
 						cur = instr;
 
@@ -302,8 +268,8 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 
 
 					}
-					
-				}				
+
+				}
 			}
 		}
 		aux = read_line(input, buffer);
@@ -316,7 +282,7 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 	*/
 	fprintf(output, "%d\n", pos);
 	set_globalOut(output);
-	stable_visit(extern_table, outprint);
+	stable_visit(extern_table, outPrint);
 	fprintf(output, "B\n");
 	for(cur = start; cur != NULL; cur = cur->next) {
 		/*
@@ -325,7 +291,7 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 		*/
 		int count = 0;
 		f = 0;
-	   
+
 		if(cur->op->opcode == JMP) {
 			EntryData *label_ptr;
 			label_ptr = stable_find(label_table, cur->opds[0]->value.label);
@@ -350,8 +316,8 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 				i = 1;
 			}
 			label_ptr = stable_find(label_table, cur->opds[i]->value.label);
-			
-			
+
+
 			if(label_ptr == NULL)
 				die("%s label not defined", cur->opds[i]->value.label);
 			jmp_line = label_ptr->i;
@@ -363,14 +329,14 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 		else {
 			if(cur->opds[2]) {
 				if((cur->op->opcode%2 == 0) && cur->opds[2]->type == NUMBER_TYPE)
-					f = 1;			
+					f = 1;
 			}
 		}
 	out:
-		
+
 		count += fprintf(output, "%.2x", cur->op->opcode + f);
 
-			
+
 		for (int i = 0; i < 3; i++) {
 			if (cur->opds[i]) {
 				if ((cur->opds[i]->type & LABEL) == LABEL) {
@@ -379,12 +345,12 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 					cur_line = cur->pos;
 					label_ptr = stable_find(label_table, cur->opds[i]->value.label);
 
-					
-					if(label_ptr == NULL)
+
+					if (label_ptr == NULL)
 						die("%s label not defined", cur->opds[i]->value.label);
 					else
 						jmp_line = label_ptr->i;
-					if(jmp_line > cur_line) {
+					if (jmp_line > cur_line) {
 						if(cur->opds[1] == NULL)
 							count += fprintf(output, "%.6x", jmp_line - cur_line);
 						else if(cur->opds[2] == NULL)
@@ -398,7 +364,7 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 
 						else if(cur->opds[2] == NULL)
 							count += fprintf(output, "%.4x",  cur_line - jmp_line);
-						else 
+						else
 							count += fprintf(output, "%.2x",  cur_line - jmp_line);
 					}
 				}
@@ -419,10 +385,9 @@ int assemble(const char *filename, FILE *input, FILE *output) {
 
 		fprintf(output, "\n");
 	}
-	
+
 	stable_destroy(alias_table);
 	stable_destroy(label_table);
 	stable_destroy(extern_table);
 	return 1;
 }
-
