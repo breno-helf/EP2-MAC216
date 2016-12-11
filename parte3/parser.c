@@ -163,29 +163,28 @@ int parse (const char *s, SymbolTable alias_table, Instruction **instr, const ch
 
             /* Se o operando lido for um alias */
             if (data != NULL) {
-				printf("Case 1\n");
                 (*instr)->opds[opnum] = data->opd;
             }
             /* Se o operando esperado for um label */
             else if (((*instr)->op->opd_types[opnum] & LABEL) == LABEL) {
-				printf("Case 2\n");
+
                 (*instr)->opds[opnum] = operand_create_label(opd_read[opnum]);
             }
             /* Se o operando for um registrador*/
             else if (((*instr)->op->opd_types[opnum] & REGISTER) == REGISTER && !(isdigit(opd_read[opnum][0]) || opd_read[opnum][0] == '#')) {
-				printf("Case 3\n");
+
 				int k = 1;
 				(*instr)->opds[opnum] = operand_create_register(atoi(&opd_read[opnum][k]));
                 
             }
             /* Se o operando esperado for uma string */
             else if (((*instr)->op->opd_types[opnum] & STRING) == STRING) {
-				printf("Case 4\n");
+
                 (*instr)->opds[opnum] = operand_create_string(opd_read[opnum]);
             }
             /* Se o operando for um numero hexadecimal */
             else {
-				printf("Case 5\n");
+
                 if (opd_read[opnum][0] == '#')
                     opd_read[opnum] = HexToDec(opd_read[opnum]);
                 (*instr)->opds[opnum] = operand_create_number(atoi(&opd_read[opnum][0]));
