@@ -38,7 +38,9 @@ int main(int argc, char *argv[]) {
 	int i;
 	FILE *in, *out;
 	char *infile, *outfile;
-	
+
+	set_prog_name("macas");
+
 	for(i = 1; i < argc; i++) {
 		infile = argv[i];
 		outfile = outfile_name(infile);

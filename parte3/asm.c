@@ -16,6 +16,8 @@
 #include "parser.h"
 #include "buffer.h"
 
+#define MAX_JMP 16777215
+
 FILE *globalOut;
 
 int isCode (Instruction *instr)
@@ -351,6 +353,8 @@ int assemble (const char *filename, FILE *input, FILE *output) {
 					else
 						jmp_line = label_ptr->i;
 					if (jmp_line > cur_line) {
+						if((jmp_line - cur_line) > MAX_JMP)
+							die("Max JMP exceeded");
 						if(cur->opds[1] == NULL)
 							count += fprintf(output, "%.6x", jmp_line - cur_line);
 						else if(cur->opds[2] == NULL)
@@ -359,6 +363,9 @@ int assemble (const char *filename, FILE *input, FILE *output) {
 							count += fprintf(output, "%.2x", jmp_line - cur_line);
 					}
 					else {
+						if((cur_line - jmp_line) > MAX_JMP)
+							die("Max JMP exceeded");
+
 						if(cur->opds[1] == NULL)
 							count += fprintf(output, "%.6x",  cur_line - jmp_line);
 
