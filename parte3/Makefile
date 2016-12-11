@@ -17,6 +17,10 @@ maclk: maclk.o stable.o error.o mactypes.h asmtypes.o optable.o opcodes.h parser
 	$(CC) $(CFLAGS) $^ -o $@
 	make clean
 
+parser: parse_test.o parser.o stable.o optable.o error.o buffer.o asmtypes.o
+	$(CC) $(CFLAGS) $^ -o $@
+	make clean
+
 %.o: %.c %.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
