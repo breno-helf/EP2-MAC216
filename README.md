@@ -1,0 +1,1 @@
+This a repo for a university assignment in the MAC0216 lecture (Progamming Techniques). We learned an Assembly based language named MACAL and built a compiler for it.
